@@ -2,13 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useStore, Facture } from '@/context/StoreContext';
 
 export default function FactureDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const factureId = String(params?.id || '');
 
   const {
@@ -24,6 +23,7 @@ export default function FactureDetailPage() {
     toBasePrice,
     currencySymbol,
     currencyCode,
+    isHydrated,
     t,
   } = useStore();
 
@@ -37,14 +37,17 @@ export default function FactureDetailPage() {
 
   // Auto-print if ?print=true
   useEffect(() => {
-    if (searchParams?.get('print') === 'true') {
-      setIsPreviewOpen(true);
-      const timer = setTimeout(() => {
-        window.print();
-      }, 600);
-      return () => clearTimeout(timer);
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('print') === 'true') {
+        setIsPreviewOpen(true);
+        const timer = setTimeout(() => {
+          window.print();
+        }, 600);
+        return () => clearTimeout(timer);
+      }
     }
-  }, [searchParams]);
+  }, []);
 
   // Find dynamic invoice or fallback to default
   const foundFacture = getFacture?.(factureId) || factures?.find((f) => f.id === factureId || f.numero === factureId);
@@ -71,6 +74,37 @@ export default function FactureDetailPage() {
   };
 
   const facture = foundFacture || defaultFacture;
+
+  if (!isHydrated) {
+    return (
+      <div className="w-full min-h-[60vh] flex items-center justify-center">
+        <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!foundFacture && factureId && factureId !== 'fac-2026-0038' && factureId !== 'default') {
+    return (
+      <div className="w-full max-w-[1280px] mx-auto py-16 px-4 flex flex-col items-center justify-center text-center gap-4">
+        <div className="w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant mb-2">
+          <span className="material-symbols-outlined text-4xl">receipt_long</span>
+        </div>
+        <h1 className="text-2xl font-bold text-on-surface m-0">{t('Facture introuvable')}</h1>
+        <p className="text-sm text-on-surface-variant max-w-md m-0">
+          {companySettings?.language === 'en'
+            ? `Invoice #${factureId} does not exist or has been deleted.`
+            : `La facture #${factureId} n'existe pas ou a été supprimée.`}
+        </p>
+        <Link
+          href="/dashboard/factures"
+          className="mt-4 px-6 py-2.5 bg-primary text-on-primary rounded-xl font-semibold text-sm hover:bg-primary-hover transition-colors inline-flex items-center gap-2"
+        >
+          <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+          <span>{t('Retour à la liste des factures')}</span>
+        </Link>
+      </div>
+    );
+  }
 
   const handleMarkAsPaid = () => {
     if (facture.id) {

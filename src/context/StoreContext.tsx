@@ -1304,7 +1304,28 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   const getClient = (id: string): Client | undefined => {
-    return clients.find((c) => c.id === id);
+    if (!id) return undefined;
+    const trimmed = id.trim();
+    const lower = trimmed.toLowerCase();
+    const numPart = trimmed.replace(/^cli-?0*/i, '');
+    return (
+      clients.find(
+        (c) =>
+          c.id === trimmed ||
+          c.id === numPart ||
+          c.id.toLowerCase() === lower ||
+          `${c.prenom} ${c.nom}`.toLowerCase().includes(lower) ||
+          c.entreprise.toLowerCase().includes(lower)
+      ) ||
+      INITIAL_CLIENTS.find(
+        (c) =>
+          c.id === trimmed ||
+          c.id === numPart ||
+          c.id.toLowerCase() === lower ||
+          `${c.prenom} ${c.nom}`.toLowerCase().includes(lower) ||
+          c.entreprise.toLowerCase().includes(lower)
+      )
+    );
   };
 
   const getClientOrders = (clientId: string): Commande[] => {

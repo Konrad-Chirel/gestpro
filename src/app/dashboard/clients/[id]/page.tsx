@@ -111,7 +111,7 @@ export default function ClientDetailPage() {
     );
   }
 
-  const initials = (client.prenom[0] + client.nom[0]).toUpperCase() || 'CL';
+  const initials = `${client.prenom?.[0] || ''}${client.nom?.[0] || ''}`.toUpperCase() || 'CL';
   const totalInvoiced = clientInvoices.reduce((sum, f) => sum + f.totalTTC, 0) || client.totalDepense;
   const totalDue = clientInvoices.reduce((sum, f) => sum + f.resteDu, 0);
 
