@@ -22,15 +22,21 @@ export default function TopHeader({ onMenuClick }: { onMenuClick?: () => void })
     markAllNotificationsAsRead,
     clearAllNotifications,
     formatCurrency,
+    user,
+    userProfile,
+    companySettings,
+    logout,
   } = useStore();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const notifContainerRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const desktopSearchInputRef = useRef<HTMLInputElement>(null);
   const mobileSearchInputRef = useRef<HTMLInputElement>(null);
 
@@ -44,6 +50,9 @@ export default function TopHeader({ onMenuClick }: { onMenuClick?: () => void })
       if (notifContainerRef.current && !notifContainerRef.current.contains(target)) {
         setIsNotificationsOpen(false);
       }
+      if (userMenuRef.current && !userMenuRef.current.contains(target)) {
+        setIsUserMenuOpen(false);
+      }
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -51,6 +60,7 @@ export default function TopHeader({ onMenuClick }: { onMenuClick?: () => void })
         setIsSearchOpen(false);
         setIsMobileSearchOpen(false);
         setIsNotificationsOpen(false);
+        setIsUserMenuOpen(false);
       }
       // Shortcut Ctrl+K or Cmd+K to focus search
       if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
@@ -375,6 +385,17 @@ export default function TopHeader({ onMenuClick }: { onMenuClick?: () => void })
     );
   };
 
+  const displayName = userProfile?.full_name || user?.user_metadata?.full_name || 'Konrad Chirel';
+  const displayCompany = userProfile?.company_name || companySettings?.companyName || 'GestPro S.A.S';
+  const displayEmail = user?.email || userProfile?.email || '';
+  const initials = displayName
+    .split(' ')
+    .filter(Boolean)
+    .map((w: string) => w[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase() || 'KC';
+
   return (
     <>
       <header className="fixed top-0 left-0 md:left-72 right-0 h-20 bg-background/80 backdrop-blur-md z-40 border-b border-border-base flex items-center justify-between px-container-margin gap-4">
@@ -622,19 +643,75 @@ export default function TopHeader({ onMenuClick }: { onMenuClick?: () => void })
             )}
           </div>
 
-          {/* User Profile */}
-          <div className="flex items-center gap-3 pl-2 sm:pl-6 border-l border-border-base shrink-0">
-            <div className="text-right hidden sm:block">
-              <p className="font-label-md text-label-md text-on-surface">Moussa Diallo</p>
-              <p className="text-[10px] text-on-surface-variant uppercase tracking-widest">{t('header.admin')}</p>
-            </div>
-            <Link
-              href="/dashboard/parametres"
-              className="w-10 h-10 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/20 hover:scale-105 transition-transform shrink-0"
-              title="Profil & Paramètres"
+          {/* User Profile Menu */}
+          <div ref={userMenuRef} className="relative flex items-center gap-3 pl-2 sm:pl-6 border-l border-border-base shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsUserMenuOpen((prev) => !prev)}
+              className="flex items-center gap-3 text-left p-1 rounded-full sm:rounded-xl hover:bg-surface-container-high transition-colors cursor-pointer group"
+              aria-expanded={isUserMenuOpen}
             >
-              <span className="material-symbols-outlined text-on-primary text-[20px]">person</span>
-            </Link>
+              <div className="text-right hidden sm:block">
+                <p className="font-label-md text-label-md text-on-surface font-semibold group-hover:text-primary transition-colors">{displayName}</p>
+                <p className="text-[10px] text-on-surface-variant uppercase tracking-wider">{displayCompany}</p>
+              </div>
+              <div
+                className="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-sm shadow-md shadow-primary/20 group-hover:scale-105 transition-transform shrink-0"
+                title={`${displayName} - ${displayEmail}`}
+              >
+                {initials}
+              </div>
+            </button>
+
+            {/* Dropdown Menu */}
+            {isUserMenuOpen && (
+              <div className="absolute right-0 top-full mt-2 w-64 bg-surface rounded-2xl shadow-2xl border border-border-base py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                {/* User Info Header */}
+                <div className="px-4 py-3 border-b border-border-base">
+                  <p className="text-sm font-bold text-on-surface truncate">{displayName}</p>
+                  <p className="text-xs text-on-surface-variant truncate mt-0.5">{displayEmail || 'Connecté'}</p>
+                  <span className="inline-block mt-1.5 px-2 py-0.5 text-[10px] font-semibold bg-primary/10 text-primary rounded-full uppercase tracking-wider">
+                    {displayCompany}
+                  </span>
+                </div>
+
+                {/* Menu items */}
+                <div className="py-1">
+                  <Link
+                    href="/dashboard/parametres"
+                    onClick={() => setIsUserMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container-high transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[20px] text-on-surface-variant">settings</span>
+                    <span>Mon profil & paramètres</span>
+                  </Link>
+
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setIsUserMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container-high transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[20px] text-on-surface-variant">dashboard</span>
+                    <span>Tableau de bord</span>
+                  </Link>
+                </div>
+
+                {/* Logout Button */}
+                <div className="border-t border-border-base pt-1 mt-1">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      setIsUserMenuOpen(false);
+                      await logout();
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-error hover:bg-error/10 transition-colors text-left cursor-pointer font-medium"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">logout</span>
+                    <span>Se déconnecter</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </header>

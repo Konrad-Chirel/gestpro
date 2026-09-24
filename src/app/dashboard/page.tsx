@@ -5,7 +5,11 @@ import { useMemo } from 'react';
 import { useStore } from '@/context/StoreContext';
 
 export default function Dashboard() {
-  const { clients, commandes, factures, formatCurrency, t } = useStore();
+  const { clients, commandes, factures, formatCurrency, t, user, userProfile } = useStore();
+
+  const displayName = userProfile?.full_name || user?.user_metadata?.full_name || '';
+  const firstName = displayName ? displayName.split(' ')[0] : '';
+  const greeting = firstName ? `${t('dashboard.welcome')}, ${firstName}` : t('dashboard.welcome');
 
   const stats = useMemo(() => {
     // 1. Chiffre d'affaires : Total encaissé (montantPaye) sur toutes les factures
@@ -73,7 +77,7 @@ export default function Dashboard() {
       {/* Header Section */}
       <div className="flex flex-col gap-2 relative">
         <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-text-primary flex items-center flex-wrap gap-2">
-          {t('dashboard.welcome')} <span className="inline-block hover:animate-bounce origin-bottom -mt-2">👋</span>
+          {greeting} <span className="inline-block hover:animate-bounce origin-bottom -mt-2">👋</span>
         </h1>
         <p className="text-body-lg font-body-lg text-text-secondary mt-2">{t('dashboard.subtitle')}</p>
       </div>

@@ -1,7 +1,17 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { getTranslation, Language } from '@/i18n/translations';
+import { createClient } from '@/lib/supabase/client';
+import type { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
+
+export interface UserProfile {
+  id: string;
+  email?: string;
+  full_name?: string;
+  company_name?: string;
+  avatar_url?: string;
+}
 
 export interface Client {
   id: string;
@@ -147,6 +157,11 @@ export interface NotificationItem {
 
 interface StoreContextType {
   isHydrated: boolean;
+  // Auth & Profile
+  user: User | null;
+  userProfile: UserProfile | null;
+  logout: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
   // Theme
   theme: ThemeMode;
   toggleTheme: () => void;
@@ -448,7 +463,7 @@ const INITIAL_COMMANDES: Commande[] = [
     clientEmail: 'sophie.dubois@design-studio.fr',
     dateCreation: '24 Oct 2023',
     dateLivraison: '28/10/2023',
-    creeePar: 'Moussa Diallo',
+    creeePar: 'Konrad Chirel',
     statut: 'livree',
     articles: [
       { id: '1', productName: 'Support Premium', unitPrice: 120.00, quantity: 1 },
@@ -468,7 +483,7 @@ const INITIAL_COMMANDES: Commande[] = [
     clientEmail: 'marc.lefevre@btp-services.com',
     dateCreation: '25 Oct 2023',
     dateLivraison: '30/10/2023',
-    creeePar: 'Moussa Diallo',
+    creeePar: 'Konrad Chirel',
     statut: 'attente',
     articles: [
       { id: '1', productName: 'Farine de blé', unitPrice: 37.92, quantity: 1 },
@@ -486,7 +501,7 @@ const INITIAL_COMMANDES: Commande[] = [
     clientEmail: 'amina.diallo@agro-senegal.sn',
     dateCreation: '25 Oct 2023',
     dateLivraison: '29/10/2023',
-    creeePar: 'Moussa Diallo',
+    creeePar: 'Konrad Chirel',
     statut: 'preparation',
     articles: [
       { id: '1', productName: 'Farine de blé', unitPrice: 1.20, quantity: 100 },
@@ -508,7 +523,7 @@ const INITIAL_COMMANDES: Commande[] = [
     clientEmail: 'jean.dupont@dupont-consulting.fr',
     dateCreation: '26 Oct 2023',
     dateLivraison: '02/11/2023',
-    creeePar: 'Moussa Diallo',
+    creeePar: 'Konrad Chirel',
     statut: 'confirmee',
     articles: [
       { id: '1', productName: 'Farine de blé', unitPrice: 1.20, quantity: 40 },
@@ -527,7 +542,7 @@ const INITIAL_COMMANDES: Commande[] = [
     clientEmail: 'claire.fontaine@papeterie-est.fr',
     dateCreation: '26 Oct 2023',
     dateLivraison: '27/10/2023',
-    creeePar: 'Moussa Diallo',
+    creeePar: 'Konrad Chirel',
     statut: 'annulee',
     articles: [
       { id: '1', productName: 'Sucre en poudre 1kg', unitPrice: 10.42, quantity: 1 },
@@ -545,7 +560,7 @@ const INITIAL_COMMANDES: Commande[] = [
     clientEmail: 'thomas.martin@tech-distrib.com',
     dateCreation: '27 Oct 2023',
     dateLivraison: '31/10/2023',
-    creeePar: 'Moussa Diallo',
+    creeePar: 'Konrad Chirel',
     statut: 'livree',
     articles: [
       { id: '1', productName: 'Licence Pro Annuelle', unitPrice: 450.00, quantity: 1 },
@@ -565,7 +580,7 @@ const INITIAL_COMMANDES: Commande[] = [
     clientEmail: 'lucie.bernard@gourmet-paris.fr',
     dateCreation: '28 Oct 2023',
     dateLivraison: '05/11/2023',
-    creeePar: 'Moussa Diallo',
+    creeePar: 'Konrad Chirel',
     statut: 'attente',
     articles: [
       { id: '1', productName: 'Farine de blé', unitPrice: 1.20, quantity: 50 },
@@ -586,7 +601,7 @@ const INITIAL_COMMANDES: Commande[] = [
     clientEmail: 'contact@xyz-industries.com',
     dateCreation: '28 Oct 2023',
     dateLivraison: '04/11/2023',
-    creeePar: 'Moussa Diallo',
+    creeePar: 'Konrad Chirel',
     statut: 'confirmee',
     articles: [
       { id: '1', productName: 'Licence Pro Annuelle', unitPrice: 450.00, quantity: 2 },
@@ -606,7 +621,7 @@ const INITIAL_COMMANDES: Commande[] = [
     clientEmail: 'amadou.t@example.com',
     dateCreation: '25/08/2026',
     dateLivraison: '28/08/2026',
-    creeePar: 'Moussa Diallo',
+    creeePar: 'Konrad Chirel',
     statut: 'livree',
     articles: [
       { id: '1', productName: 'Sucre en poudre 1kg', unitPrice: 1.10, quantity: 9 },
@@ -626,7 +641,7 @@ const INITIAL_COMMANDES: Commande[] = [
     clientEmail: 'fatou.n@ndiayetech.sn',
     dateCreation: '24/08/2026',
     dateLivraison: '30/08/2026',
-    creeePar: 'Moussa Diallo',
+    creeePar: 'Konrad Chirel',
     statut: 'attente',
     articles: [
       { id: '1', productName: 'Formation Initiale', unitPrice: 250.00, quantity: 2 },
@@ -1003,6 +1018,9 @@ function applyThemeToDOM(mode: ThemeMode) {
 }
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
+  const supabase = createClient();
+  const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
   const [theme, setThemeState] = useState<ThemeMode>('dark');
   const [clients, setClients] = useState<Client[]>(INITIAL_CLIENTS);
@@ -1013,6 +1031,99 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
   const [companySettings, setCompanySettings] = useState<CompanySettings>(DEFAULT_COMPANY_SETTINGS);
   const [toast, setToast] = useState<ToastMessage | null>(null);
+
+  const refreshProfile = useCallback(async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      if (currentUser) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', currentUser.id)
+          .single();
+
+        const fullName = profile?.full_name || currentUser.user_metadata?.full_name || '';
+        const companyName = profile?.company_name || currentUser.user_metadata?.company_name || '';
+
+        setUserProfile({
+          id: currentUser.id,
+          email: currentUser.email,
+          full_name: fullName,
+          company_name: companyName,
+          avatar_url: profile?.avatar_url,
+        });
+
+        if (companyName) {
+          setCompanySettings((prev) => ({
+            ...prev,
+            companyName: companyName,
+            email: currentUser.email || prev.email,
+          }));
+        }
+      } else {
+        setUserProfile(null);
+      }
+    } catch (e) {
+      console.warn('Could not refresh profile', e);
+    }
+  }, [supabase]);
+
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      console.warn('Sign out error', e);
+    }
+    setUser(null);
+    setUserProfile(null);
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
+    }
+  };
+
+  useEffect(() => {
+    refreshProfile();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event: AuthChangeEvent, session: Session | null) => {
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      if (currentUser) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', currentUser.id)
+          .single();
+
+        const fullName = profile?.full_name || currentUser.user_metadata?.full_name || '';
+        const companyName = profile?.company_name || currentUser.user_metadata?.company_name || '';
+
+        setUserProfile({
+          id: currentUser.id,
+          email: currentUser.email,
+          full_name: fullName,
+          company_name: companyName,
+          avatar_url: profile?.avatar_url,
+        });
+
+        if (companyName) {
+          setCompanySettings((prev) => ({
+            ...prev,
+            companyName: companyName,
+            email: currentUser.email || prev.email,
+          }));
+        }
+      } else {
+        setUserProfile(null);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [refreshProfile, supabase]);
+
 
   const toggleTheme = () => {
     setThemeState((prev) => {
@@ -1353,6 +1464,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
     const newCmd: Commande = {
       ...commandeData,
+      creeePar: commandeData.creeePar || userProfile?.full_name || user?.user_metadata?.full_name || 'Konrad Chirel',
       id: nextId,
       numero,
       dateCreation,
@@ -1663,7 +1775,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-  const updateCompanySettings = (updates: Partial<CompanySettings>) => {
+  const updateCompanySettings = async (updates: Partial<CompanySettings>) => {
     setCompanySettings((prev) => {
       const updated = { ...prev, ...updates };
       try {
@@ -1673,6 +1785,37 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       }
       return updated;
     });
+
+    if (user) {
+      try {
+        await supabase
+          .from('company_settings')
+          .upsert(
+            {
+              user_id: user.id,
+              company_name: updates.companyName,
+              email: updates.email || user.email,
+              phone: updates.phone,
+              address: updates.address,
+              siret: updates.siret,
+              tva_number: updates.tva,
+              currency: updates.currency,
+              language: updates.language,
+            },
+            { onConflict: 'user_id' }
+          );
+
+        if (updates.companyName) {
+          await supabase
+            .from('profiles')
+            .update({ company_name: updates.companyName })
+            .eq('id', user.id);
+        }
+      } catch (err) {
+        console.warn('Could not sync company settings to Supabase', err);
+      }
+    }
+
     showToast('Informations de l’entreprise enregistrées avec succès !', 'success');
   };
 
@@ -1750,6 +1893,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     <StoreContext.Provider
       value={{
         isHydrated,
+        user,
+        userProfile,
+        logout,
+        refreshProfile,
         theme,
         toggleTheme,
         setTheme,

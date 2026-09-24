@@ -195,7 +195,7 @@ export default function RegisterPage() {
                     <input 
                       className="w-full h-11 sm:h-12 bg-transparent pl-11 sm:pl-12 pr-4 text-xs sm:text-body-md text-on-surface placeholder:text-text-secondary/50 focus:outline-none" 
                       id="nom" 
-                      placeholder="Moussa Diallo" 
+                      placeholder="Ex: Konrad Chirel" 
                       type="text" 
                       required
                       value={nom}
@@ -216,7 +216,7 @@ export default function RegisterPage() {
                     <input 
                       className="w-full h-11 sm:h-12 bg-transparent pl-11 sm:pl-12 pr-4 text-xs sm:text-body-md text-on-surface placeholder:text-text-secondary/50 focus:outline-none" 
                       id="entreprise" 
-                      placeholder="Diallo Trading S.A.R.L" 
+                      placeholder="Ex: Chirel Solutions SARL" 
                       type="text" 
                       value={entreprise}
                       onChange={(e) => setEntreprise(e.target.value)}
@@ -236,7 +236,7 @@ export default function RegisterPage() {
                     <input 
                       className="w-full h-11 sm:h-12 bg-transparent pl-11 sm:pl-12 pr-4 text-xs sm:text-body-md text-on-surface placeholder:text-text-secondary/50 focus:outline-none" 
                       id="reg-email" 
-                      placeholder="moussa@entreprise.com" 
+                      placeholder="contact@mon-entreprise.com" 
                       type="email" 
                       required
                       value={email}

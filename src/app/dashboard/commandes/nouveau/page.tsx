@@ -18,7 +18,7 @@ const CATALOG_PRODUCTS = [
 
 export default function NouvelleCommandePage() {
   const router = useRouter();
-  const { clients, produits, addCommande, formatCurrency, currencySymbol, t } = useStore();
+  const { clients, produits, addCommande, formatCurrency, currencySymbol, t, user, userProfile } = useStore();
 
   const catalogList = (produits && produits.length > 0)
     ? produits.map((p) => ({ name: p.nom, price: p.prix }))
@@ -162,7 +162,7 @@ export default function NouvelleCommandePage() {
         clientNom: `${selectedClient.prenom} ${selectedClient.nom} (${selectedClient.entreprise})`,
         clientEmail: selectedClient.email,
         dateLivraison: dateLivraison || 'À convenir',
-        creeePar: 'Moussa Diallo',
+        creeePar: userProfile?.full_name || user?.user_metadata?.full_name || 'Konrad Chirel',
         statut: 'attente',
         articles: validItems,
         totalHT: subtotalHT,

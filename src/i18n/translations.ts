@@ -17,7 +17,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'header.admin': 'Administrateur',
 
     // Dashboard
-    'dashboard.welcome': 'Bonjour, Moussa',
+    'dashboard.welcome': 'Bonjour',
     'dashboard.subtitle': "Voici un aperçu de votre activité aujourd'hui.",
     'dashboard.revenue': "Chiffre d'affaires",
     'dashboard.orders': 'Commandes',
@@ -161,7 +161,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'header.admin': 'Administrator',
 
     // Dashboard
-    'dashboard.welcome': 'Welcome, Moussa',
+    'dashboard.welcome': 'Welcome',
     'dashboard.subtitle': 'Here is an overview of your activity today.',
     'dashboard.revenue': 'Revenue',
     'dashboard.orders': 'Orders',

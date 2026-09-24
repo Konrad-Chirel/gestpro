@@ -7,7 +7,7 @@ import autoTable from 'jspdf-autotable';
 
 type FilterType = 'tous' | 'commandes' | 'factures';
 type PeriodFilterType = '7jours' | 'aujourdhui' | 'hier' | '30jours' | 'mois' | 'tous';
-type UserFilterType = 'tous' | 'Moussa Diallo' | 'Système' | 'Portail Client' | 'API Logistique';
+type UserFilterType = string;
 
 interface ActivityItem {
   id: string;
@@ -34,11 +34,20 @@ interface ActivityItem {
 }
 
 export default function HistoriquePage() {
-  const { formatCurrency, t, companySettings, commandes, factures, paiements, clients } = useStore();
+  const { formatCurrency, t, companySettings, commandes, factures, paiements, clients, user, userProfile } = useStore();
+
+  const currentUserName = userProfile?.full_name || user?.user_metadata?.full_name || 'Konrad Chirel';
+  const currentUserInitials = currentUserName
+    .split(' ')
+    .filter(Boolean)
+    .map((w: string) => w[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase() || 'KC';
 
   const [activeFilter, setActiveFilter] = useState<FilterType>('tous');
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodFilterType>('7jours');
-  const [selectedUser, setSelectedUser] = useState<UserFilterType>('Moussa Diallo');
+  const [selectedUser, setSelectedUser] = useState<UserFilterType>(currentUserName);
 
   const [isPeriodDropdownOpen, setIsPeriodDropdownOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
@@ -106,8 +115,8 @@ export default function HistoriquePage() {
         timestamp: new Date(now.getTime() - 2 * 3600 * 1000),
         dateLabel: t("Aujourd'hui"),
         heure: t('Il y a 2h'),
-        acteur: 'Moussa Diallo',
-        acteurInitiales: 'MD',
+        acteur: currentUserName,
+        acteurInitiales: currentUserInitials,
         action: t('a créé la commande'),
         reference: 'CMD-2026-0047',
         statut: t('Nouvelle commande'),
@@ -141,8 +150,8 @@ export default function HistoriquePage() {
         timestamp: new Date(now.getTime() - 5 * 3600 * 1000),
         dateLabel: t("Aujourd'hui"),
         heure: t('Il y a 5h'),
-        acteur: 'Moussa Diallo',
-        acteurInitiales: 'MD',
+        acteur: currentUserName,
+        acteurInitiales: currentUserInitials,
         action: t('a généré la facture'),
         reference: 'FAC-2026-0039',
         statut: t('Facturation'),
@@ -179,8 +188,8 @@ export default function HistoriquePage() {
         timestamp: new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 10, 15),
         dateLabel: t('Hier'),
         heure: '10:15',
-        acteur: 'Moussa Diallo',
-        acteurInitiales: 'MD',
+        acteur: currentUserName,
+        acteurInitiales: currentUserInitials,
         action: t('a créé la commande'),
         reference: 'CMD-2026-0046',
         statut: t('En attente'),
@@ -218,8 +227,8 @@ export default function HistoriquePage() {
         timestamp: new Date(threeDaysAgo.getFullYear(), threeDaysAgo.getMonth(), threeDaysAgo.getDate(), 16, 20),
         dateLabel: `${threeDaysAgo.getDate()} ${isEn ? 'Aug' : 'Août'}`,
         heure: '16:20',
-        acteur: 'Moussa Diallo',
-        acteurInitiales: 'MD',
+        acteur: currentUserName,
+        acteurInitiales: currentUserInitials,
         action: t('a validé un virement bancaire pour'),
         reference: 'FAC-2026-0035',
         statut: t('Paiement validé'),
@@ -255,8 +264,8 @@ export default function HistoriquePage() {
         timestamp: new Date(twelveDaysAgo.getFullYear(), twelveDaysAgo.getMonth(), twelveDaysAgo.getDate(), 15, 10),
         dateLabel: `${twelveDaysAgo.getDate()} ${isEn ? 'Aug' : 'Août'}`,
         heure: '15:10',
-        acteur: 'Moussa Diallo',
-        acteurInitiales: 'MD',
+        acteur: currentUserName,
+        acteurInitiales: currentUserInitials,
         action: t('a confirmé la commande'),
         reference: 'CMD-2026-0042',
         statut: t('Confirmée'),
@@ -274,8 +283,8 @@ export default function HistoriquePage() {
         timestamp: new Date(twentyDaysAgo.getFullYear(), twentyDaysAgo.getMonth(), twentyDaysAgo.getDate(), 10, 0),
         dateLabel: `${twentyDaysAgo.getDate()} ${isEn ? 'Aug' : 'Août'}`,
         heure: '10:00',
-        acteur: 'Moussa Diallo',
-        acteurInitiales: 'MD',
+        acteur: currentUserName,
+        acteurInitiales: currentUserInitials,
         action: t('a créé la fiche client'),
         reference: 'Amadou Traoré (Traoré & Co)',
         statut: t('Nouveau Client'),
@@ -308,12 +317,12 @@ export default function HistoriquePage() {
     const isEn = companySettings?.language === 'en';
     return [
       { value: 'tous' as UserFilterType, label: t('Tous les utilisateurs'), icon: 'groups' },
-      { value: 'Moussa Diallo' as UserFilterType, label: 'Moussa Diallo', initials: 'MD' },
+      { value: currentUserName as UserFilterType, label: currentUserName, initials: currentUserInitials },
       { value: 'Système' as UserFilterType, label: isEn ? 'System' : 'Système', icon: 'smart_toy' },
       { value: 'Portail Client' as UserFilterType, label: isEn ? 'Client Portal' : 'Portail Client', icon: 'public' },
       { value: 'API Logistique' as UserFilterType, label: isEn ? 'Logistics API' : 'API Logistique', icon: 'sync' },
     ];
-  }, [companySettings, t]);
+  }, [companySettings, t, currentUserName, currentUserInitials]);
 
   // Period filtering condition helper
   const matchesPeriod = (itemTimestamp: Date, period: PeriodFilterType) => {
@@ -420,17 +429,17 @@ export default function HistoriquePage() {
     // Dynamic counts reflecting real store entities & active user
     const createdOrdersCount = Math.max(
       weekActivities.filter((a) => a.type === 'commandes').length * 4 + 2,
-      commandes.length * 3 + (selectedUser === 'Moussa Diallo' ? 12 : 2)
+      commandes.length * 3 + (selectedUser === currentUserName ? 12 : 2)
     );
 
     const paymentsCount = Math.max(
       weekActivities.filter((a) => a.icon === 'payments' || a.action.toLowerCase().includes('paiement')).length * 3 + 4,
-      paiements.length * 3 + (selectedUser === 'Moussa Diallo' ? 8 : 4)
+      paiements.length * 3 + (selectedUser === currentUserName ? 8 : 4)
     );
 
     const invoicesCount = Math.max(
       weekActivities.filter((a) => a.type === 'factures' && a.icon !== 'payments').length * 4 + 3,
-      factures.length * 3 + (selectedUser === 'Moussa Diallo' ? 10 : 3)
+      factures.length * 3 + (selectedUser === currentUserName ? 10 : 3)
     );
 
     const newClientsCount = Math.max(
@@ -758,9 +767,9 @@ export default function HistoriquePage() {
             }}
             className="flex items-center gap-2 px-3 py-2 bg-surface border border-border-base rounded-lg text-xs font-medium text-text-primary shadow-sm hover:bg-surface-container transition-colors cursor-pointer"
           >
-            {selectedUser === 'Moussa Diallo' ? (
+            {selectedUser === currentUserName ? (
               <div className="w-4 h-4 rounded-full bg-primary flex items-center justify-center text-on-primary text-[8px] font-bold">
-                MD
+                {currentUserInitials}
               </div>
             ) : (
               <span className="material-symbols-outlined text-[16px] text-primary">person</span>
@@ -806,7 +815,7 @@ export default function HistoriquePage() {
         </div>
 
         {/* Reset Filters on Mobile */}
-        {(selectedPeriod !== '7jours' || selectedUser !== 'Moussa Diallo' || activeFilter !== 'tous') && (
+        {(selectedPeriod !== '7jours' || selectedUser !== currentUserName || activeFilter !== 'tous') && (
           <button
             type="button"
             onClick={handleResetFilters}
@@ -1016,7 +1025,7 @@ export default function HistoriquePage() {
                 <h3 className="font-label-md text-label-md text-text-secondary uppercase tracking-wider m-0">
                   {t('FILTRES RAPIDES')}
                 </h3>
-                {(selectedPeriod !== '7jours' || selectedUser !== 'Moussa Diallo' || activeFilter !== 'tous') && (
+                {(selectedPeriod !== '7jours' || selectedUser !== currentUserName || activeFilter !== 'tous') && (
                   <button
                     type="button"
                     onClick={handleResetFilters}
@@ -1042,9 +1051,9 @@ export default function HistoriquePage() {
                     className="w-full bg-input-bg border border-border-base rounded-lg p-3 flex items-center justify-between cursor-pointer hover:border-primary/50 transition-colors text-left"
                   >
                     <div className="flex items-center gap-2 truncate">
-                      {selectedUser === 'Moussa Diallo' ? (
+                      {selectedUser === currentUserName ? (
                         <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-on-primary font-label-sm text-[10px] font-bold shrink-0">
-                          MD
+                          {currentUserInitials}
                         </div>
                       ) : (
                         <div className="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center text-text-secondary shrink-0">
