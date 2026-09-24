@@ -142,6 +142,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'common.orders_plural': 'commandes',
     'common.all': 'Tous',
     'common.status': 'Statut',
+    'common.new': 'Nouveau',
   },
 
   en: {
@@ -285,6 +286,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'common.orders_plural': 'orders',
     'common.all': 'All',
     'common.status': 'Status',
+    'common.new': 'New',
   },
 };
 

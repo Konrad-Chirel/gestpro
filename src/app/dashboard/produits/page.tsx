@@ -84,29 +84,30 @@ export default function ProduitsPage() {
   }, [produits, searchQuery, selectedCategory]);
 
   return (
-    <div className="w-full pb-16 flex flex-col px-4 sm:px-8 py-8 gap-8">
-      <div className="flex flex-col w-full gap-8">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-on-surface tracking-tight m-0">
+    <div className="w-full pb-16 flex flex-col px-4 sm:px-8 py-6 sm:py-8 gap-6 sm:gap-8">
+      <div className="flex flex-col w-full gap-6 sm:gap-8">
+        <div className="flex items-center justify-between gap-3 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <h1 className="text-base sm:text-2xl lg:text-3xl font-bold text-on-surface tracking-tight m-0 whitespace-nowrap">
               {t('products.catalog')}
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-bold text-xs border border-border-base">
+            <span className="px-2.5 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-bold text-xs border border-border-base shrink-0">
               {filteredProduits.length}
             </span>
           </div>
           <Link
             href="/dashboard/produits/nouveau"
-            className="bg-primary hover:bg-primary-hover text-on-primary font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-6 rounded-full flex items-center gap-2 transition-colors shadow-md shadow-primary/20 shrink-0 whitespace-nowrap"
+            className="bg-primary hover:bg-primary-hover text-on-primary font-semibold text-xs sm:text-sm h-9 sm:h-10 px-3 sm:px-5 rounded-full flex items-center justify-center gap-1.5 sm:gap-2 transition-colors shadow-md shadow-primary/20 shrink-0 whitespace-nowrap cursor-pointer active:scale-95"
           >
-            <span className="material-symbols-outlined text-[20px]">add</span>
-            <span>{t('products.new')}</span>
+            <span className="material-symbols-outlined text-[18px]">add</span>
+            <span className="hidden sm:inline">{t('products.new')}</span>
+            <span className="sm:hidden">{t('common.new')}</span>
           </Link>
         </div>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between bg-surface p-4 rounded-xl shadow-sm border border-border-base gap-4">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
-            <div className="flex items-center bg-input-bg rounded-lg px-4 py-2 border border-border-base w-72 focus-within:border-primary transition-colors">
+            <div className="flex items-center bg-input-bg rounded-lg px-4 py-2 border border-border-base w-full sm:w-72 focus-within:border-primary transition-colors">
               <span className="material-symbols-outlined text-on-surface-variant mr-2 text-[20px]">
                 search
               </span>
