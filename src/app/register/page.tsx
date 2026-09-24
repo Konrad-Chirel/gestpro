@@ -44,13 +44,23 @@ export default function RegisterPage() {
 
     setIsSubmitting(true);
     try {
+      const trimmedNom = nom.trim();
+      const trimmedCompany = entreprise.trim() || 'GestPro S.A.S';
+      const trimmedEmail = email.trim();
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('gestpro_user_name', trimmedNom);
+        localStorage.setItem('gestpro_company_name', trimmedCompany);
+        localStorage.setItem('gestpro_user_email', trimmedEmail);
+      }
+
       const { data, error } = await supabase.auth.signUp({
-        email: email.trim(),
+        email: trimmedEmail,
         password: password,
         options: {
           data: {
-            full_name: nom.trim(),
-            company_name: entreprise.trim() || 'GestPro S.A.S',
+            full_name: trimmedNom,
+            company_name: trimmedCompany,
           },
         },
       });
@@ -59,6 +69,18 @@ export default function RegisterPage() {
         showToast(error.message, 'error');
         setIsSubmitting(false);
         return;
+      }
+
+      // If session was not immediately granted (e.g. email confirmation setting), attempt auto-login
+      if (!data.session) {
+        try {
+          await supabase.auth.signInWithPassword({
+            email: trimmedEmail,
+            password: password,
+          });
+        } catch {
+          // ignore
+        }
       }
 
       showToast(
@@ -75,17 +97,12 @@ export default function RegisterPage() {
   };
 
   const handleGoogleSignup = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/dashboard`,
-        },
-      });
-      if (error) showToast(error.message, 'error');
-    } catch (err: any) {
-      showToast(err.message || 'Erreur Google Auth', 'error');
-    }
+    showToast(
+      lang === 'en'
+        ? 'Google Sign-In is not enabled in your Supabase dashboard yet. Please register with Email & Password.'
+        : "La connexion Google n'est pas encore activée dans votre console Supabase. Veuillez vous inscrire avec Email et Mot de passe.",
+      'info'
+    );
   };
 
   return (

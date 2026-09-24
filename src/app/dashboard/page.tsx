@@ -7,9 +7,10 @@ import { useStore } from '@/context/StoreContext';
 export default function Dashboard() {
   const { clients, commandes, factures, formatCurrency, t, user, userProfile } = useStore();
 
-  const displayName = userProfile?.full_name || user?.user_metadata?.full_name || '';
-  const firstName = displayName ? displayName.split(' ')[0] : '';
-  const greeting = firstName ? `${t('dashboard.welcome')}, ${firstName}` : t('dashboard.welcome');
+  const storedName = typeof window !== 'undefined' ? localStorage.getItem('gestpro_user_name') : null;
+  const displayName = userProfile?.full_name || user?.user_metadata?.full_name || storedName || 'Konrad';
+  const firstName = displayName.trim().split(' ')[0] || 'Konrad';
+  const greeting = `${t('dashboard.welcome')}, ${firstName}`;
 
   const stats = useMemo(() => {
     // 1. Chiffre d'affaires : Total encaissé (montantPaye) sur toutes les factures

@@ -46,6 +46,16 @@ export default function LoginPage() {
         return;
       }
 
+      if (data.user) {
+        const fullName = data.user.user_metadata?.full_name || '';
+        const companyName = data.user.user_metadata?.company_name || '';
+        if (typeof window !== 'undefined') {
+          if (fullName) localStorage.setItem('gestpro_user_name', fullName);
+          if (companyName) localStorage.setItem('gestpro_company_name', companyName);
+          if (data.user.email) localStorage.setItem('gestpro_user_email', data.user.email);
+        }
+      }
+
       showToast(lang === 'en' ? 'Welcome back!' : 'Connexion réussie !', 'success');
       router.push('/dashboard');
     } catch (err: any) {
@@ -55,17 +65,12 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/dashboard`,
-        },
-      });
-      if (error) showToast(error.message, 'error');
-    } catch (err: any) {
-      showToast(err.message || 'Erreur Google Auth', 'error');
-    }
+    showToast(
+      lang === 'en'
+        ? 'Google Sign-In is not enabled in your Supabase dashboard yet. Please log in with Email & Password.'
+        : "La connexion Google n'est pas encore activée dans votre console Supabase. Veuillez vous connecter avec Email et Mot de passe.",
+      'info'
+    );
   };
 
   return (

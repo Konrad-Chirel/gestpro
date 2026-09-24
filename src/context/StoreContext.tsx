@@ -1019,8 +1019,30 @@ function applyThemeToDOM(mode: ThemeMode) {
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   const supabase = createClient();
+  const getInitialUserProfile = (): UserProfile => {
+    if (typeof window !== 'undefined') {
+      const savedName = localStorage.getItem('gestpro_user_name');
+      const savedCompany = localStorage.getItem('gestpro_company_name');
+      const savedEmail = localStorage.getItem('gestpro_user_email');
+      if (savedName) {
+        return {
+          id: 'local',
+          full_name: savedName,
+          company_name: savedCompany || 'GestPro S.A.S',
+          email: savedEmail || '',
+        };
+      }
+    }
+    return {
+      id: 'default',
+      full_name: 'Konrad Chirel',
+      company_name: 'GestPro S.A.S',
+      email: '',
+    };
+  };
+
   const [user, setUser] = useState<User | null>(null);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile>(getInitialUserProfile);
   const [isHydrated, setIsHydrated] = useState(false);
   const [theme, setThemeState] = useState<ThemeMode>('dark');
   const [clients, setClients] = useState<Client[]>(INITIAL_CLIENTS);
@@ -1044,8 +1066,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           .eq('id', currentUser.id)
           .single();
 
-        const fullName = profile?.full_name || currentUser.user_metadata?.full_name || '';
-        const companyName = profile?.company_name || currentUser.user_metadata?.company_name || '';
+        const storedName = typeof window !== 'undefined' ? localStorage.getItem('gestpro_user_name') : '';
+        const storedCompany = typeof window !== 'undefined' ? localStorage.getItem('gestpro_company_name') : '';
+
+        const fullName = profile?.full_name || currentUser.user_metadata?.full_name || storedName || 'Konrad Chirel';
+        const companyName = profile?.company_name || currentUser.user_metadata?.company_name || storedCompany || 'GestPro S.A.S';
 
         setUserProfile({
           id: currentUser.id,
@@ -1055,6 +1080,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           avatar_url: profile?.avatar_url,
         });
 
+        if (typeof window !== 'undefined') {
+          if (fullName) localStorage.setItem('gestpro_user_name', fullName);
+          if (companyName) localStorage.setItem('gestpro_company_name', companyName);
+          if (currentUser.email) localStorage.setItem('gestpro_user_email', currentUser.email);
+        }
+
         if (companyName) {
           setCompanySettings((prev) => ({
             ...prev,
@@ -1062,8 +1093,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             email: currentUser.email || prev.email,
           }));
         }
-      } else {
-        setUserProfile(null);
       }
     } catch (e) {
       console.warn('Could not refresh profile', e);
@@ -1077,7 +1106,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       console.warn('Sign out error', e);
     }
     setUser(null);
-    setUserProfile(null);
     if (typeof window !== 'undefined') {
       window.location.href = '/login';
     }
@@ -1096,8 +1124,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           .eq('id', currentUser.id)
           .single();
 
-        const fullName = profile?.full_name || currentUser.user_metadata?.full_name || '';
-        const companyName = profile?.company_name || currentUser.user_metadata?.company_name || '';
+        const storedName = typeof window !== 'undefined' ? localStorage.getItem('gestpro_user_name') : '';
+        const storedCompany = typeof window !== 'undefined' ? localStorage.getItem('gestpro_company_name') : '';
+
+        const fullName = profile?.full_name || currentUser.user_metadata?.full_name || storedName || 'Konrad Chirel';
+        const companyName = profile?.company_name || currentUser.user_metadata?.company_name || storedCompany || 'GestPro S.A.S';
 
         setUserProfile({
           id: currentUser.id,
@@ -1107,6 +1138,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           avatar_url: profile?.avatar_url,
         });
 
+        if (typeof window !== 'undefined') {
+          if (fullName) localStorage.setItem('gestpro_user_name', fullName);
+          if (companyName) localStorage.setItem('gestpro_company_name', companyName);
+          if (currentUser.email) localStorage.setItem('gestpro_user_email', currentUser.email);
+        }
+
         if (companyName) {
           setCompanySettings((prev) => ({
             ...prev,
@@ -1114,8 +1151,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             email: currentUser.email || prev.email,
           }));
         }
-      } else {
-        setUserProfile(null);
       }
     });
 
