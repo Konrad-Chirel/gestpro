@@ -5,14 +5,18 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/context/StoreContext';
 import { getTranslation } from '@/i18n/translations';
+import { createClient } from '@/lib/supabase/client';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { theme, toggleTheme } = useStore();
+  const { theme, toggleTheme, showToast } = useStore();
+  const supabase = createClient();
+
   const [lang, setLang] = useState<'fr' | 'en'>('fr');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -23,9 +27,45 @@ export default function LoginPage() {
 
   const t = (text: string) => getTranslation(text, lang);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    router.push('/dashboard');
+    if (!email || !password) {
+      showToast(lang === 'en' ? 'Please fill in all fields' : 'Veuillez remplir tous les champs', 'error');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password,
+      });
+
+      if (error) {
+        showToast(error.message, 'error');
+        setIsLoading(false);
+        return;
+      }
+
+      showToast(lang === 'en' ? 'Welcome back!' : 'Connexion réussie !', 'success');
+      router.push('/dashboard');
+    } catch (err: any) {
+      showToast(err.message || 'Erreur lors de la connexion', 'error');
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+        },
+      });
+      if (error) showToast(error.message, 'error');
+    } catch (err: any) {
+      showToast(err.message || 'Erreur Google Auth', 'error');
+    }
   };
 
   return (
@@ -153,10 +193,11 @@ export default function LoginPage() {
 
                 {/* Main CTA */}
                 <button 
-                  className="mt-2 sm:mt-4 h-11 sm:h-12 w-full bg-primary hover:bg-primary-hover text-on-primary font-semibold text-xs sm:text-sm rounded-xl shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 group cursor-pointer active:scale-95" 
+                  disabled={isLoading}
+                  className="mt-2 sm:mt-4 h-11 sm:h-12 w-full bg-primary hover:bg-primary-hover disabled:opacity-60 text-on-primary font-semibold text-xs sm:text-sm rounded-xl shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 group cursor-pointer active:scale-95" 
                   type="submit"
                 >
-                  <span>{t('Se connecter')}</span>
+                  <span>{isLoading ? (lang === 'en' ? 'Signing in...' : 'Connexion en cours...') : t('Se connecter')}</span>
                   <span className="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">
                     arrow_forward
                   </span>
@@ -171,7 +212,7 @@ export default function LoginPage() {
 
                 {/* Google Login */}
                 <button 
-                  onClick={() => router.push('/dashboard')}
+                  onClick={handleGoogleLogin}
                   className="h-11 sm:h-12 w-full bg-surface-container hover:bg-surface-container-high text-on-surface font-semibold text-xs sm:text-sm rounded-xl transition-colors flex items-center justify-center gap-3 cursor-pointer border border-border-base active:scale-95" 
                   type="button"
                 >

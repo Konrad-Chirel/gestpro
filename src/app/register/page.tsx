@@ -5,10 +5,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/context/StoreContext';
 import { getTranslation } from '@/i18n/translations';
+import { createClient } from '@/lib/supabase/client';
 
 export default function RegisterPage() {
   const router = useRouter();
   const { theme, toggleTheme, showToast } = useStore();
+  const supabase = createClient();
+
   const [lang, setLang] = useState<'fr' | 'en'>('fr');
   
   const [nom, setNom] = useState('');
@@ -28,17 +31,61 @@ export default function RegisterPage() {
 
   const t = (text: string) => getTranslation(text, lang);
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!agreeTerms) {
       showToast(lang === 'en' ? 'Please accept the terms of service.' : 'Veuillez accepter les conditions d’utilisation.', 'error');
       return;
     }
+    if (!email || !password || !nom) {
+      showToast(lang === 'en' ? 'Please fill in all required fields' : 'Veuillez remplir tous les champs obligatoires', 'error');
+      return;
+    }
+
     setIsSubmitting(true);
-    setTimeout(() => {
-      showToast(lang === 'en' ? 'Account created successfully! Welcome.' : 'Compte créé avec succès ! Bienvenue.', 'success');
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password: password,
+        options: {
+          data: {
+            full_name: nom.trim(),
+            company_name: entreprise.trim() || 'GestPro S.A.S',
+          },
+        },
+      });
+
+      if (error) {
+        showToast(error.message, 'error');
+        setIsSubmitting(false);
+        return;
+      }
+
+      showToast(
+        lang === 'en' 
+          ? 'Account created! Welcome to GestPro.' 
+          : 'Compte créé avec succès ! Bienvenue sur GestPro.', 
+        'success'
+      );
       router.push('/dashboard');
-    }, 400);
+    } catch (err: any) {
+      showToast(err.message || 'Une erreur est survenue lors de l’inscription', 'error');
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleGoogleSignup = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+        },
+      });
+      if (error) showToast(error.message, 'error');
+    } catch (err: any) {
+      showToast(err.message || 'Erreur Google Auth', 'error');
+    }
   };
 
   return (
@@ -268,7 +315,7 @@ export default function RegisterPage() {
 
                 {/* Google Sign up */}
                 <button 
-                  onClick={() => router.push('/dashboard')}
+                  onClick={handleGoogleSignup}
                   className="h-11 sm:h-12 w-full bg-surface-container hover:bg-surface-container-high text-on-surface font-semibold text-xs sm:text-sm rounded-xl transition-colors flex items-center justify-center gap-3 cursor-pointer border border-border-base active:scale-95" 
                   type="button"
                 >
