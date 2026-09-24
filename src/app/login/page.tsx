@@ -72,12 +72,28 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = async () => {
-    showToast(
-      lang === 'en'
-        ? 'Google Sign-In is not enabled in your Supabase dashboard yet. Please log in with Email & Password.'
-        : "La connexion Google n'est pas encore activée dans votre console Supabase. Veuillez vous connecter avec Email et Mot de passe.",
-      'info'
-    );
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`,
+        },
+      });
+      if (error) {
+        if (error.message.includes('not enabled') || error.message.includes('Unsupported provider') || error.message.includes('disabled')) {
+          showToast(
+            lang === 'en'
+              ? 'Google Sign-In is not enabled in your Supabase dashboard (Authentication > Providers > Google).'
+              : "Le fournisseur Google n'est pas encore activé dans votre console Supabase (Authentication > Providers > Google). Veuillez vous connecter avec Email et Mot de passe.",
+            'error'
+          );
+        } else {
+          showToast(error.message, 'error');
+        }
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Erreur lors de la connexion Google', 'error');
+    }
   };
 
   return (
