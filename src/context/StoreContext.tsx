@@ -218,8 +218,9 @@ interface StoreContextType {
   getProduit: (id: string) => Produit | undefined;
   // Company Settings
   updateCompanySettings: (updates: Partial<CompanySettings>) => void;
-  // Reset
+  // Reset & Seed
   resetToDefaultData: () => void;
+  seedDemoData: (targetUserId?: string) => Promise<void>;
 }
 
 // Initial Seed Data
@@ -1166,6 +1167,153 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [companySettings, setCompanySettings] = useState<CompanySettings>(DEFAULT_COMPANY_SETTINGS);
   const [toast, setToast] = useState<ToastMessage | null>(null);
 
+  const seedDemoDataForUser = useCallback(async (targetUserId: string) => {
+    try {
+      // 1. Prepare clientIdMap and clientRows
+      const clientIdMap: Record<string, string> = {};
+      const clientRows = INITIAL_CLIENTS.map((c) => {
+        const newId = generateUUID();
+        clientIdMap[c.id] = newId;
+        return {
+          id: newId,
+          user_id: targetUserId,
+          nom: c.nom || '',
+          prenom: c.prenom || '',
+          entreprise: c.entreprise || '',
+          email: c.email || '',
+          telephone: c.telephone || '',
+          adresse: c.adresse || '',
+          ville: c.ville || '',
+          code_postal: c.codePostal || '',
+          pays: c.pays || 'Sénégal',
+          ninea: c.ninea || '',
+          statut: c.statut === 'inactif' ? 'inactif' : 'actif',
+          commandes_count: Number(c.commandesCount) || 0,
+          total_depense: Number(c.totalDepense) || 0,
+          solde_du: Number(c.soldeDu) || 0,
+          delai_paiement: c.delaiPaiement || '14 Jours',
+          created_at: c.createdAt ? new Date(c.createdAt).toISOString() : new Date().toISOString(),
+        };
+      });
+
+      // 2. Insert clients
+      const { error: clientErr } = await supabase.from('clients').insert(clientRows);
+      if (clientErr) {
+        console.warn('Error seeding clients:', clientErr);
+      }
+
+      // 3. Prepare commandeIdMap and commandeRows
+      const commandeIdMap: Record<string, string> = {};
+      const commandeRows = INITIAL_COMMANDES.map((cmd) => {
+        const newId = generateUUID();
+        commandeIdMap[cmd.id] = newId;
+        return {
+          id: newId,
+          user_id: targetUserId,
+          numero: cmd.numero || '',
+          client_id: clientIdMap[cmd.clientId] || null,
+          client_nom: cmd.clientNom || '',
+          client_email: cmd.clientEmail || '',
+          date_creation: cmd.dateCreation || '',
+          date_livraison: cmd.dateLivraison || null,
+          creee_par: cmd.creeePar || 'Admin',
+          statut: ['attente', 'confirmee', 'preparation', 'livree', 'annulee'].includes(cmd.statut) ? cmd.statut : 'attente',
+          articles: cmd.articles || [],
+          total_ht: Number(cmd.totalHT) || 0,
+          tva: Number(cmd.tva) || 0,
+          total_ttc: Number(cmd.totalTTC) || 0,
+          notes: cmd.notes || '',
+        };
+      });
+
+      // 4. Insert commandes
+      const { error: cmdErr } = await supabase.from('commandes').insert(commandeRows);
+      if (cmdErr) {
+        console.warn('Error seeding commandes:', cmdErr);
+      }
+
+      // 5. Prepare factureIdMap and factureRows
+      const factureIdMap: Record<string, string> = {};
+      const factureRows = INITIAL_FACTURES.map((fac) => {
+        const newId = generateUUID();
+        factureIdMap[fac.id] = newId;
+        return {
+          id: newId,
+          user_id: targetUserId,
+          numero: fac.numero || '',
+          commande_id: (fac.commandeId && commandeIdMap[fac.commandeId]) ? commandeIdMap[fac.commandeId] : null,
+          client_id: clientIdMap[fac.clientId] || null,
+          client_nom: fac.clientNom || '',
+          client_adresse: fac.clientAdresse || '',
+          client_email: fac.clientEmail || '',
+          client_siret: fac.clientSiret || '',
+          statut: ['payee', 'attente', 'retard', 'brouillon'].includes(fac.statut) ? fac.statut : 'attente',
+          articles: fac.articles || [],
+          total_ht: Number(fac.totalHT) || 0,
+          tva: Number(fac.tva) || 0,
+          total_ttc: Number(fac.totalTTC) || 0,
+          reste_du: Number(fac.resteDu) || 0,
+          montant_paye: Number(fac.montantPaye) || 0,
+          date_emission: fac.dateEmission || '',
+          date_echeance: fac.dateEcheance || '',
+        };
+      });
+
+      // 6. Insert factures
+      const { error: facErr } = await supabase.from('factures').insert(factureRows);
+      if (facErr) {
+        console.warn('Error seeding factures:', facErr);
+      }
+
+      // 7. Prepare and insert paiements
+      const paiementRows = INITIAL_PAIEMENTS.map((pay) => {
+        return {
+          id: generateUUID(),
+          user_id: targetUserId,
+          reference: pay.reference || '',
+          facture_id: (pay.factureId && factureIdMap[pay.factureId]) ? factureIdMap[pay.factureId] : null,
+          facture_numero: pay.factureNumero || '',
+          client_id: clientIdMap[pay.clientId] || null,
+          client_nom: pay.clientNom || '',
+          montant: Number(pay.montant) || 0,
+          devise: 'FCFA',
+          methode: ['virement', 'carte', 'cheque', 'especes'].includes(pay.methode) ? pay.methode : 'virement',
+          date: pay.date || '',
+          statut: ['reussi', 'attente', 'echoue'].includes(pay.statut) ? pay.statut : 'reussi',
+          notes: pay.notes || '',
+        };
+      });
+
+      const { error: payErr } = await supabase.from('paiements').insert(paiementRows);
+      if (payErr) {
+        console.warn('Error seeding paiements:', payErr);
+      }
+
+      // 8. Prepare and insert produits
+      const produitRows = INITIAL_PRODUITS.map((prod) => {
+        return {
+          id: generateUUID(),
+          user_id: targetUserId,
+          nom: prod.nom,
+          sku: prod.sku,
+          categorie: prod.categorie || 'Autre',
+          description: prod.description || '',
+          prix_ht: Number(prod.prix) || 0,
+          tva: Number(prod.tva) || 20,
+          stock: Number(prod.stock) || 0,
+          statut: prod.stock > 0 ? 'disponible' : 'rupture',
+        };
+      });
+
+      const { error: prodErr } = await supabase.from('produits').insert(produitRows);
+      if (prodErr) {
+        console.warn('Error seeding produits:', prodErr);
+      }
+    } catch (err) {
+      console.error('Failed to seed demo data', err);
+    }
+  }, [supabase]);
+
   const loadUserData = useCallback(async (currentUser: User) => {
     try {
       // 1. Fetch Profile
@@ -1178,7 +1326,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       const storedName = typeof window !== 'undefined' ? localStorage.getItem('gestpro_user_name') : '';
       const storedCompany = typeof window !== 'undefined' ? localStorage.getItem('gestpro_company_name') : '';
 
-      const fullName = profile?.full_name || currentUser.user_metadata?.full_name || storedName || '';
+      const fullName = profile?.full_name || currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || storedName || '';
       const companyName = profile?.company_name || currentUser.user_metadata?.company_name || storedCompany || 'GestPro S.A.S';
 
       setUserProfile({
@@ -1223,13 +1371,46 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       }
 
       // 3. Load isolated user data from Supabase
-      const [clientsRes, commandesRes, facturesRes, paiementsRes, produitsRes] = await Promise.all([
+      let [clientsRes, commandesRes, facturesRes, paiementsRes, produitsRes] = await Promise.all([
         supabase.from('clients').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
         supabase.from('commandes').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
         supabase.from('factures').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
         supabase.from('paiements').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
         supabase.from('produits').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
       ]);
+
+      const isKonrad = Boolean(
+        currentUser.email?.toLowerCase().includes('konrad') ||
+        currentUser.email?.toLowerCase().includes('chirel') ||
+        fullName.toLowerCase().includes('konrad') ||
+        fullName.toLowerCase().includes('chirel') ||
+        currentUser.user_metadata?.full_name?.toLowerCase().includes('konrad') ||
+        currentUser.user_metadata?.full_name?.toLowerCase().includes('chirel') ||
+        currentUser.user_metadata?.name?.toLowerCase().includes('konrad') ||
+        currentUser.user_metadata?.name?.toLowerCase().includes('chirel')
+      );
+
+      // Auto-seed for Konrad Chirel account if tables are currently empty
+      if (isKonrad && (!clientsRes.data || clientsRes.data.length === 0)) {
+        await seedDemoDataForUser(currentUser.id);
+        const [reClients, reCommandes, reFactures, rePaiements, reProduits] = await Promise.all([
+          supabase.from('clients').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
+          supabase.from('commandes').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
+          supabase.from('factures').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
+          supabase.from('paiements').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
+          supabase.from('produits').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
+        ]);
+        clientsRes = reClients;
+        commandesRes = reCommandes;
+        facturesRes = reFactures;
+        paiementsRes = rePaiements;
+        produitsRes = reProduits;
+        setNotifications(INITIAL_NOTIFICATIONS);
+      } else if (isKonrad) {
+        setNotifications(INITIAL_NOTIFICATIONS);
+      } else {
+        setNotifications([]);
+      }
 
       setClients((clientsRes.data || []).map(mapDbClient));
       setCommandes((commandesRes.data || []).map(mapDbCommande));
@@ -1241,7 +1422,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsHydrated(true);
     }
-  }, [supabase]);
+  }, [supabase, seedDemoDataForUser]);
 
   const refreshProfile = useCallback(async () => {
     try {
@@ -2091,6 +2272,29 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     showToast('Données réinitialisées avec succès.', 'info');
   };
 
+  const seedDemoData = useCallback(async (targetUserId?: string) => {
+    const uid = targetUserId || user?.id;
+    if (!uid) {
+      showToast('Utilisateur non connecté', 'error');
+      return;
+    }
+    await seedDemoDataForUser(uid);
+    const [reClients, reCommandes, reFactures, rePaiements, reProduits] = await Promise.all([
+      supabase.from('clients').select('*').eq('user_id', uid).order('created_at', { ascending: false }),
+      supabase.from('commandes').select('*').eq('user_id', uid).order('created_at', { ascending: false }),
+      supabase.from('factures').select('*').eq('user_id', uid).order('created_at', { ascending: false }),
+      supabase.from('paiements').select('*').eq('user_id', uid).order('created_at', { ascending: false }),
+      supabase.from('produits').select('*').eq('user_id', uid).order('created_at', { ascending: false }),
+    ]);
+    setClients((reClients.data || []).map(mapDbClient));
+    setCommandes((reCommandes.data || []).map(mapDbCommande));
+    setFactures((reFactures.data || []).map(mapDbFacture));
+    setPaiements((rePaiements.data || []).map(mapDbPaiement));
+    setProduits((reProduits.data || []).map(mapDbProduit));
+    setNotifications(INITIAL_NOTIFICATIONS);
+    showToast('Données de démonstration chargées avec succès !', 'success');
+  }, [user, supabase, seedDemoDataForUser]);
+
   const activeCurrency = companySettings.currency || 'EUR';
   const currencyConfig = CURRENCY_CONFIG[activeCurrency] || CURRENCY_CONFIG.EUR;
   const currencyCode = activeCurrency;
@@ -2200,6 +2404,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         getProduit,
         updateCompanySettings,
         resetToDefaultData,
+        seedDemoData,
       }}
     >
       {children}

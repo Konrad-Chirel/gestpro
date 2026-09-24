@@ -8,7 +8,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean, onClose
   const pathname = usePathname();
   const { t, user, userProfile, logout } = useStore();
 
-  const displayName = userProfile?.full_name || user?.user_metadata?.full_name || 'Utilisateur';
+  const displayName = userProfile?.full_name || user?.user_metadata?.full_name || user?.user_metadata?.name || 'Utilisateur';
   const displayEmail = user?.email || userProfile?.email || '';
   const initials = displayName
     .split(' ')

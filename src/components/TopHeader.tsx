@@ -389,7 +389,7 @@ export default function TopHeader({ onMenuClick }: { onMenuClick?: () => void })
   const storedCompany = typeof window !== 'undefined' ? localStorage.getItem('gestpro_company_name') : null;
   const storedEmail = typeof window !== 'undefined' ? localStorage.getItem('gestpro_user_email') : null;
 
-  const displayName = userProfile?.full_name || user?.user_metadata?.full_name || storedName || 'Utilisateur';
+  const displayName = userProfile?.full_name || user?.user_metadata?.full_name || user?.user_metadata?.name || storedName || 'Utilisateur';
   const displayCompany = userProfile?.company_name || companySettings?.companyName || storedCompany || 'GestPro S.A.S';
   const displayEmail = user?.email || userProfile?.email || storedEmail || '';
   const initials = displayName

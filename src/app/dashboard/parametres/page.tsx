@@ -4,10 +4,11 @@ import { useState, useEffect } from 'react';
 import { useStore } from '@/context/StoreContext';
 
 export default function ParametresPage() {
-  const { companySettings, updateCompanySettings, t } = useStore();
+  const { companySettings, updateCompanySettings, seedDemoData, t } = useStore();
 
   const [activeTab, setActiveTab] = useState<'general' | 'preferences' | 'facturation' | 'securite'>('general');
   const [isSaving, setIsSaving] = useState(false);
+  const [isSeeding, setIsSeeding] = useState(false);
 
   // Form fields
   const [companyName, setCompanyName] = useState(companySettings?.companyName || 'GestPro S.A.S');
@@ -455,6 +456,29 @@ export default function ParametresPage() {
                     className="px-4 py-2 rounded-xl bg-surface hover:bg-surface-container border border-border-base text-xs font-medium text-text-primary transition-colors cursor-pointer"
                   >
                     {t('Modifier')}
+                  </button>
+                </div>
+
+                <div className="p-4 rounded-xl bg-surface-container-high/60 border border-border-base flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined text-primary text-[24px]">dataset</span>
+                    <div>
+                      <h4 className="font-label-lg text-text-primary m-0">{t('Données de démonstration')}</h4>
+                      <p className="font-body-sm text-text-secondary m-0">{t('Charger ou restaurer le jeu complet de 10 clients, commandes, factures et produits dans votre compte')}</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={isSeeding}
+                    onClick={async () => {
+                      setIsSeeding(true);
+                      await seedDemoData();
+                      setIsSeeding(false);
+                    }}
+                    className="px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-on-primary text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">sync</span>
+                    <span>{isSeeding ? t('Chargement...') : t('Charger les démos')}</span>
                   </button>
                 </div>
               </div>
