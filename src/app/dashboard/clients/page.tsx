@@ -359,19 +359,33 @@ export default function ClientsPage() {
                 })}
 
                 {filteredClients.length === 0 && (
-                  <div className="py-16 text-center bg-surface rounded-xl shadow-sm border border-border-base flex flex-col items-center justify-center gap-3">
-                    <span className="material-symbols-outlined text-4xl text-on-surface-variant">person_search</span>
-                    <p className="text-on-surface-variant text-sm m-0">{t('Aucun client trouvé pour votre recherche.')}</p>
-                    {(searchQuery || statusFilter !== 'all') && (
-                      <button
-                        onClick={() => {
-                          setSearchQuery('');
-                          setStatusFilter('all');
-                        }}
-                        className="text-primary hover:underline text-xs font-semibold cursor-pointer"
+                  <div className="py-16 text-center bg-surface rounded-xl shadow-sm border border-dashed border-border-base flex flex-col items-center justify-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-1">
+                      <span className="material-symbols-outlined text-[28px]">{clients.length === 0 ? 'person_add' : 'person_search'}</span>
+                    </div>
+                    <p className="text-on-surface font-semibold text-sm m-0">
+                      {clients.length === 0 ? t('Aucun client enregistré') : t('Aucun client trouvé pour votre recherche.')}
+                    </p>
+                    {clients.length === 0 ? (
+                      <Link
+                        href="/dashboard/clients/nouveau"
+                        className="mt-2 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-on-primary text-xs font-semibold hover:bg-primary-hover transition-colors shadow-sm"
                       >
-                        {t('Effacer les filtres')}
-                      </button>
+                        <span className="material-symbols-outlined text-[16px]">add</span>
+                        <span>{t('clients.new_client')}</span>
+                      </Link>
+                    ) : (
+                      (searchQuery || statusFilter !== 'all') && (
+                        <button
+                          onClick={() => {
+                            setSearchQuery('');
+                            setStatusFilter('all');
+                          }}
+                          className="text-primary hover:underline text-xs font-semibold cursor-pointer"
+                        >
+                          {t('Effacer les filtres')}
+                        </button>
+                      )
                     )}
                   </div>
                 )}

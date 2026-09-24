@@ -49,6 +49,11 @@ export default function RegisterPage() {
       const trimmedEmail = email.trim();
 
       if (typeof window !== 'undefined') {
+        localStorage.removeItem('gestpro_clients_v1');
+        localStorage.removeItem('gestpro_commandes_v1');
+        localStorage.removeItem('gestpro_factures_v1');
+        localStorage.removeItem('gestpro_paiements_v1');
+        localStorage.removeItem('gestpro_produits_v1');
         localStorage.setItem('gestpro_user_name', trimmedNom);
         localStorage.setItem('gestpro_company_name', trimmedCompany);
         localStorage.setItem('gestpro_user_email', trimmedEmail);
@@ -69,6 +74,19 @@ export default function RegisterPage() {
         showToast(error.message, 'error');
         setIsSubmitting(false);
         return;
+      }
+
+      if (data.user) {
+        try {
+          await supabase.from('profiles').upsert({
+            id: data.user.id,
+            email: trimmedEmail,
+            full_name: trimmedNom,
+            company_name: trimmedCompany,
+          });
+        } catch {
+          // ignore
+        }
       }
 
       // If session was not immediately granted (e.g. email confirmation setting), attempt auto-login
@@ -212,7 +230,7 @@ export default function RegisterPage() {
                     <input 
                       className="w-full h-11 sm:h-12 bg-transparent pl-11 sm:pl-12 pr-4 text-xs sm:text-body-md text-on-surface placeholder:text-text-secondary/50 focus:outline-none" 
                       id="nom" 
-                      placeholder="Ex: Konrad Chirel" 
+                      placeholder="Ex: Amadou Diallo" 
                       type="text" 
                       required
                       value={nom}

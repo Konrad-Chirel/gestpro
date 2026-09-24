@@ -8,7 +8,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean, onClose
   const pathname = usePathname();
   const { t, user, userProfile, logout } = useStore();
 
-  const displayName = userProfile?.full_name || user?.user_metadata?.full_name || 'Konrad Chirel';
+  const displayName = userProfile?.full_name || user?.user_metadata?.full_name || 'Utilisateur';
   const displayEmail = user?.email || userProfile?.email || '';
   const initials = displayName
     .split(' ')
@@ -16,7 +16,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean, onClose
     .map((w: string) => w[0])
     .slice(0, 2)
     .join('')
-    .toUpperCase() || 'KC';
+    .toUpperCase() || (displayEmail ? displayEmail[0].toUpperCase() : 'GP');
 
   const links = [
     { href: '/dashboard', label: t('nav.dashboard'), icon: 'dashboard' },

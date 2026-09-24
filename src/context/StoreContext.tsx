@@ -463,7 +463,7 @@ const INITIAL_COMMANDES: Commande[] = [
     clientEmail: 'sophie.dubois@design-studio.fr',
     dateCreation: '24 Oct 2023',
     dateLivraison: '28/10/2023',
-    creeePar: 'Konrad Chirel',
+    creeePar: 'Admin',
     statut: 'livree',
     articles: [
       { id: '1', productName: 'Support Premium', unitPrice: 120.00, quantity: 1 },
@@ -483,7 +483,7 @@ const INITIAL_COMMANDES: Commande[] = [
     clientEmail: 'marc.lefevre@btp-services.com',
     dateCreation: '25 Oct 2023',
     dateLivraison: '30/10/2023',
-    creeePar: 'Konrad Chirel',
+    creeePar: 'Admin',
     statut: 'attente',
     articles: [
       { id: '1', productName: 'Farine de blé', unitPrice: 37.92, quantity: 1 },
@@ -501,7 +501,7 @@ const INITIAL_COMMANDES: Commande[] = [
     clientEmail: 'amina.diallo@agro-senegal.sn',
     dateCreation: '25 Oct 2023',
     dateLivraison: '29/10/2023',
-    creeePar: 'Konrad Chirel',
+    creeePar: 'Admin',
     statut: 'preparation',
     articles: [
       { id: '1', productName: 'Farine de blé', unitPrice: 1.20, quantity: 100 },
@@ -523,7 +523,7 @@ const INITIAL_COMMANDES: Commande[] = [
     clientEmail: 'jean.dupont@dupont-consulting.fr',
     dateCreation: '26 Oct 2023',
     dateLivraison: '02/11/2023',
-    creeePar: 'Konrad Chirel',
+    creeePar: 'Admin',
     statut: 'confirmee',
     articles: [
       { id: '1', productName: 'Farine de blé', unitPrice: 1.20, quantity: 40 },
@@ -542,7 +542,7 @@ const INITIAL_COMMANDES: Commande[] = [
     clientEmail: 'claire.fontaine@papeterie-est.fr',
     dateCreation: '26 Oct 2023',
     dateLivraison: '27/10/2023',
-    creeePar: 'Konrad Chirel',
+    creeePar: 'Admin',
     statut: 'annulee',
     articles: [
       { id: '1', productName: 'Sucre en poudre 1kg', unitPrice: 10.42, quantity: 1 },
@@ -560,7 +560,7 @@ const INITIAL_COMMANDES: Commande[] = [
     clientEmail: 'thomas.martin@tech-distrib.com',
     dateCreation: '27 Oct 2023',
     dateLivraison: '31/10/2023',
-    creeePar: 'Konrad Chirel',
+    creeePar: 'Admin',
     statut: 'livree',
     articles: [
       { id: '1', productName: 'Licence Pro Annuelle', unitPrice: 450.00, quantity: 1 },
@@ -580,7 +580,7 @@ const INITIAL_COMMANDES: Commande[] = [
     clientEmail: 'lucie.bernard@gourmet-paris.fr',
     dateCreation: '28 Oct 2023',
     dateLivraison: '05/11/2023',
-    creeePar: 'Konrad Chirel',
+    creeePar: 'Admin',
     statut: 'attente',
     articles: [
       { id: '1', productName: 'Farine de blé', unitPrice: 1.20, quantity: 50 },
@@ -601,7 +601,7 @@ const INITIAL_COMMANDES: Commande[] = [
     clientEmail: 'contact@xyz-industries.com',
     dateCreation: '28 Oct 2023',
     dateLivraison: '04/11/2023',
-    creeePar: 'Konrad Chirel',
+    creeePar: 'Admin',
     statut: 'confirmee',
     articles: [
       { id: '1', productName: 'Licence Pro Annuelle', unitPrice: 450.00, quantity: 2 },
@@ -621,7 +621,7 @@ const INITIAL_COMMANDES: Commande[] = [
     clientEmail: 'amadou.t@example.com',
     dateCreation: '25/08/2026',
     dateLivraison: '28/08/2026',
-    creeePar: 'Konrad Chirel',
+    creeePar: 'Admin',
     statut: 'livree',
     articles: [
       { id: '1', productName: 'Sucre en poudre 1kg', unitPrice: 1.10, quantity: 9 },
@@ -641,7 +641,7 @@ const INITIAL_COMMANDES: Commande[] = [
     clientEmail: 'fatou.n@ndiayetech.sn',
     dateCreation: '24/08/2026',
     dateLivraison: '30/08/2026',
-    creeePar: 'Konrad Chirel',
+    creeePar: 'Admin',
     statut: 'attente',
     articles: [
       { id: '1', productName: 'Formation Initiale', unitPrice: 250.00, quantity: 2 },
@@ -1017,6 +1017,118 @@ function applyThemeToDOM(mode: ThemeMode) {
   }
 }
 
+function generateUUID(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
+function isValidUUID(str?: string | null): boolean {
+  if (!str) return false;
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str.trim());
+}
+
+function mapDbClient(row: any): Client {
+  return {
+    id: row.id,
+    nom: row.nom || '',
+    prenom: row.prenom || '',
+    entreprise: row.entreprise || '',
+    email: row.email || '',
+    telephone: row.telephone || '',
+    adresse: row.adresse || '',
+    ville: row.ville || '',
+    codePostal: row.code_postal || '',
+    pays: row.pays || 'Sénégal',
+    ninea: row.ninea || '',
+    statut: row.statut === 'inactif' ? 'inactif' : 'actif',
+    commandesCount: Number(row.commandes_count) || 0,
+    totalDepense: Number(row.total_depense) || 0,
+    soldeDu: Number(row.solde_du) || 0,
+    delaiPaiement: row.delai_paiement || '14 Jours',
+    createdAt: row.created_at ? new Date(row.created_at).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
+  };
+}
+
+function mapDbCommande(row: any): Commande {
+  return {
+    id: row.id,
+    numero: row.numero || '',
+    clientId: row.client_id || '',
+    clientNom: row.client_nom || '',
+    clientEmail: row.client_email || '',
+    dateCreation: row.date_creation || (row.created_at ? new Date(row.created_at).toLocaleDateString('fr-FR') : ''),
+    dateLivraison: row.date_livraison || '',
+    creeePar: row.creee_par || '',
+    statut: row.statut || 'attente',
+    articles: Array.isArray(row.articles) ? row.articles : [],
+    totalHT: Number(row.total_ht) || 0,
+    tva: Number(row.tva) || 0,
+    totalTTC: Number(row.total_ttc) || 0,
+    notes: row.notes || '',
+  };
+}
+
+function mapDbFacture(row: any): Facture {
+  return {
+    id: row.id,
+    numero: row.numero || '',
+    commandeId: row.commande_id || undefined,
+    commandeNumero: undefined,
+    clientId: row.client_id || '',
+    clientNom: row.client_nom || '',
+    clientEmail: row.client_email || '',
+    clientAdresse: row.client_adresse || '',
+    clientSiret: row.client_siret || '',
+    dateEmission: row.date_emission || (row.created_at ? new Date(row.created_at).toLocaleDateString('fr-FR') : ''),
+    dateEcheance: row.date_echeance || '',
+    statut: row.statut === 'brouillon' ? 'attente' : (row.statut || 'attente'),
+    articles: Array.isArray(row.articles) ? row.articles : [],
+    totalHT: Number(row.total_ht) || 0,
+    tva: Number(row.tva) || 0,
+    totalTTC: Number(row.total_ttc) || 0,
+    montantPaye: Number(row.montant_paye) || 0,
+    resteDu: Number(row.reste_du) || 0,
+    notes: row.notes || '',
+  };
+}
+
+function mapDbPaiement(row: any): Paiement {
+  return {
+    id: row.id,
+    reference: row.reference || '',
+    factureId: row.facture_id || '',
+    factureNumero: row.facture_numero || '',
+    clientId: row.client_id || '',
+    clientNom: row.client_nom || '',
+    montant: Number(row.montant) || 0,
+    methode: row.methode || 'virement',
+    date: row.date || (row.created_at ? new Date(row.created_at).toLocaleDateString('fr-FR') : ''),
+    statut: row.statut || 'reussi',
+    notes: row.notes || '',
+  };
+}
+
+function mapDbProduit(row: any): Produit {
+  return {
+    id: row.id,
+    nom: row.nom || '',
+    sku: row.sku || '',
+    categorie: row.categorie || 'Autre',
+    prix: Number(row.prix_ht) || 0,
+    tva: Number(row.tva) || 20,
+    stock: Number(row.stock) || 0,
+    alerte: 5,
+    description: row.description || '',
+    createdAt: row.created_at ? new Date(row.created_at).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
+  };
+}
+
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   const supabase = createClient();
   const getInitialUserProfile = (): UserProfile => {
@@ -1034,8 +1146,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       }
     }
     return {
-      id: 'default',
-      full_name: 'Konrad Chirel',
+      id: '',
+      full_name: '',
       company_name: 'GestPro S.A.S',
       email: '',
     };
@@ -1045,14 +1157,91 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [userProfile, setUserProfile] = useState<UserProfile>(getInitialUserProfile);
   const [isHydrated, setIsHydrated] = useState(false);
   const [theme, setThemeState] = useState<ThemeMode>('dark');
-  const [clients, setClients] = useState<Client[]>(INITIAL_CLIENTS);
-  const [commandes, setCommandes] = useState<Commande[]>(INITIAL_COMMANDES);
-  const [factures, setFactures] = useState<Facture[]>(INITIAL_FACTURES);
-  const [paiements, setPaiements] = useState<Paiement[]>(INITIAL_PAIEMENTS);
-  const [produits, setProduits] = useState<Produit[]>(INITIAL_PRODUITS);
-  const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [commandes, setCommandes] = useState<Commande[]>([]);
+  const [factures, setFactures] = useState<Facture[]>([]);
+  const [paiements, setPaiements] = useState<Paiement[]>([]);
+  const [produits, setProduits] = useState<Produit[]>([]);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [companySettings, setCompanySettings] = useState<CompanySettings>(DEFAULT_COMPANY_SETTINGS);
   const [toast, setToast] = useState<ToastMessage | null>(null);
+
+  const loadUserData = useCallback(async (currentUser: User) => {
+    try {
+      // 1. Fetch Profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', currentUser.id)
+        .maybeSingle();
+
+      const storedName = typeof window !== 'undefined' ? localStorage.getItem('gestpro_user_name') : '';
+      const storedCompany = typeof window !== 'undefined' ? localStorage.getItem('gestpro_company_name') : '';
+
+      const fullName = profile?.full_name || currentUser.user_metadata?.full_name || storedName || '';
+      const companyName = profile?.company_name || currentUser.user_metadata?.company_name || storedCompany || 'GestPro S.A.S';
+
+      setUserProfile({
+        id: currentUser.id,
+        email: currentUser.email || '',
+        full_name: fullName,
+        company_name: companyName,
+        avatar_url: profile?.avatar_url,
+      });
+
+      if (typeof window !== 'undefined') {
+        if (fullName) localStorage.setItem('gestpro_user_name', fullName);
+        if (companyName) localStorage.setItem('gestpro_company_name', companyName);
+        if (currentUser.email) localStorage.setItem('gestpro_user_email', currentUser.email);
+      }
+
+      // 2. Fetch Company Settings
+      const { data: settings } = await supabase
+        .from('company_settings')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .maybeSingle();
+
+      if (settings) {
+        setCompanySettings((prev) => ({
+          ...prev,
+          companyName: settings.company_name || companyName,
+          email: settings.email || currentUser.email || prev.email,
+          phone: settings.phone || prev.phone,
+          address: settings.address || prev.address,
+          siret: settings.siret || prev.siret,
+          tva: settings.tva_number || prev.tva,
+          currency: settings.currency || prev.currency,
+          language: settings.language || prev.language,
+        }));
+      } else if (companyName) {
+        setCompanySettings((prev) => ({
+          ...prev,
+          companyName: companyName,
+          email: currentUser.email || prev.email,
+        }));
+      }
+
+      // 3. Load isolated user data from Supabase
+      const [clientsRes, commandesRes, facturesRes, paiementsRes, produitsRes] = await Promise.all([
+        supabase.from('clients').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
+        supabase.from('commandes').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
+        supabase.from('factures').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
+        supabase.from('paiements').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
+        supabase.from('produits').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
+      ]);
+
+      setClients((clientsRes.data || []).map(mapDbClient));
+      setCommandes((commandesRes.data || []).map(mapDbCommande));
+      setFactures((facturesRes.data || []).map(mapDbFacture));
+      setPaiements((paiementsRes.data || []).map(mapDbPaiement));
+      setProduits((produitsRes.data || []).map(mapDbProduit));
+    } catch (e) {
+      console.warn('Could not load user data from Supabase', e);
+    } finally {
+      setIsHydrated(true);
+    }
+  }, [supabase]);
 
   const refreshProfile = useCallback(async () => {
     try {
@@ -1060,44 +1249,22 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
       if (currentUser) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', currentUser.id)
-          .single();
-
-        const storedName = typeof window !== 'undefined' ? localStorage.getItem('gestpro_user_name') : '';
-        const storedCompany = typeof window !== 'undefined' ? localStorage.getItem('gestpro_company_name') : '';
-
-        const fullName = profile?.full_name || currentUser.user_metadata?.full_name || storedName || 'Konrad Chirel';
-        const companyName = profile?.company_name || currentUser.user_metadata?.company_name || storedCompany || 'GestPro S.A.S';
-
-        setUserProfile({
-          id: currentUser.id,
-          email: currentUser.email,
-          full_name: fullName,
-          company_name: companyName,
-          avatar_url: profile?.avatar_url,
-        });
-
-        if (typeof window !== 'undefined') {
-          if (fullName) localStorage.setItem('gestpro_user_name', fullName);
-          if (companyName) localStorage.setItem('gestpro_company_name', companyName);
-          if (currentUser.email) localStorage.setItem('gestpro_user_email', currentUser.email);
-        }
-
-        if (companyName) {
-          setCompanySettings((prev) => ({
-            ...prev,
-            companyName: companyName,
-            email: currentUser.email || prev.email,
-          }));
-        }
+        await loadUserData(currentUser);
+      } else {
+        setUser(null);
+        setUserProfile({ id: '', full_name: '', company_name: '', email: '' });
+        setClients([]);
+        setCommandes([]);
+        setFactures([]);
+        setPaiements([]);
+        setProduits([]);
+        setIsHydrated(true);
       }
     } catch (e) {
       console.warn('Could not refresh profile', e);
+      setIsHydrated(true);
     }
-  }, [supabase]);
+  }, [supabase, loadUserData]);
 
   const logout = async () => {
     try {
@@ -1106,7 +1273,23 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       console.warn('Sign out error', e);
     }
     setUser(null);
+    setUserProfile({ id: '', full_name: '', company_name: '', email: '' });
+    setClients([]);
+    setCommandes([]);
+    setFactures([]);
+    setPaiements([]);
+    setProduits([]);
+    setNotifications([]);
     if (typeof window !== 'undefined') {
+      localStorage.removeItem('gestpro_user_name');
+      localStorage.removeItem('gestpro_company_name');
+      localStorage.removeItem('gestpro_user_email');
+      localStorage.removeItem('gestpro_clients_v1');
+      localStorage.removeItem('gestpro_commandes_v1');
+      localStorage.removeItem('gestpro_factures_v1');
+      localStorage.removeItem('gestpro_paiements_v1');
+      localStorage.removeItem('gestpro_produits_v1');
+      localStorage.removeItem('gestpro_notifications_v1');
       window.location.href = '/login';
     }
   };
@@ -1118,47 +1301,23 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
       if (currentUser) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', currentUser.id)
-          .single();
-
-        const storedName = typeof window !== 'undefined' ? localStorage.getItem('gestpro_user_name') : '';
-        const storedCompany = typeof window !== 'undefined' ? localStorage.getItem('gestpro_company_name') : '';
-
-        const fullName = profile?.full_name || currentUser.user_metadata?.full_name || storedName || 'Konrad Chirel';
-        const companyName = profile?.company_name || currentUser.user_metadata?.company_name || storedCompany || 'GestPro S.A.S';
-
-        setUserProfile({
-          id: currentUser.id,
-          email: currentUser.email,
-          full_name: fullName,
-          company_name: companyName,
-          avatar_url: profile?.avatar_url,
-        });
-
-        if (typeof window !== 'undefined') {
-          if (fullName) localStorage.setItem('gestpro_user_name', fullName);
-          if (companyName) localStorage.setItem('gestpro_company_name', companyName);
-          if (currentUser.email) localStorage.setItem('gestpro_user_email', currentUser.email);
-        }
-
-        if (companyName) {
-          setCompanySettings((prev) => ({
-            ...prev,
-            companyName: companyName,
-            email: currentUser.email || prev.email,
-          }));
-        }
+        await loadUserData(currentUser);
+      } else {
+        setUser(null);
+        setUserProfile({ id: '', full_name: '', company_name: '', email: '' });
+        setClients([]);
+        setCommandes([]);
+        setFactures([]);
+        setPaiements([]);
+        setProduits([]);
+        setIsHydrated(true);
       }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [refreshProfile, supabase]);
-
+  }, [refreshProfile, loadUserData, supabase]);
 
   const toggleTheme = () => {
     setThemeState((prev) => {
@@ -1183,7 +1342,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     applyThemeToDOM(newTheme);
   };
 
-  // Hydrate from localStorage once on mount
+  // Hydrate theme on mount
   useEffect(() => {
     try {
       const storedTheme = localStorage.getItem(LOCAL_STORAGE_KEY_THEME);
@@ -1193,185 +1352,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       } else {
         applyThemeToDOM('dark');
       }
-
-      const storedClients = localStorage.getItem(LOCAL_STORAGE_KEY_CLIENTS);
-      if (storedClients) {
-        try {
-          const parsedClients: Client[] = JSON.parse(storedClients);
-          const missingClients = INITIAL_CLIENTS.filter(
-            (init) => !parsedClients.some((p) => p.id === init.id)
-          );
-          const fullClients = [...parsedClients, ...missingClients];
-          setClients(fullClients);
-          localStorage.setItem(LOCAL_STORAGE_KEY_CLIENTS, JSON.stringify(fullClients));
-        } catch {
-          setClients(INITIAL_CLIENTS);
-        }
-      } else {
-        localStorage.setItem(LOCAL_STORAGE_KEY_CLIENTS, JSON.stringify(INITIAL_CLIENTS));
-      }
-
-      const storedCmds = localStorage.getItem(LOCAL_STORAGE_KEY_COMMANDES);
-      if (storedCmds) {
-        try {
-          const parsedCmds: Commande[] = JSON.parse(storedCmds);
-          const needsMigration = !parsedCmds.some((p) => p.id === '4' || p.numero === 'CMD-2023-0894');
-          if (needsMigration) {
-            const userCreated = parsedCmds.filter(
-              (p) => !INITIAL_COMMANDES.some((init) => init.id === p.id || init.numero === p.numero) && p.id.length > 5
-            );
-            const mergedCmds = [...INITIAL_COMMANDES, ...userCreated];
-            setCommandes(mergedCmds);
-            localStorage.setItem(LOCAL_STORAGE_KEY_COMMANDES, JSON.stringify(mergedCmds));
-          } else {
-            setCommandes(parsedCmds);
-          }
-        } catch {
-          setCommandes(INITIAL_COMMANDES);
-        }
-      } else {
-        localStorage.setItem(LOCAL_STORAGE_KEY_COMMANDES, JSON.stringify(INITIAL_COMMANDES));
-      }
-
-      const storedFacs = localStorage.getItem(LOCAL_STORAGE_KEY_FACTURES);
-      if (storedFacs) {
-        try {
-          const parsedFacs: Facture[] = JSON.parse(storedFacs);
-          const userCreated = parsedFacs.filter(
-            (p) => !INITIAL_FACTURES.some((init) => init.id === p.id || init.numero === p.numero) && p.id.length > 8
-          );
-          const merged = [...INITIAL_FACTURES, ...userCreated];
-          setFactures(merged);
-        } catch {
-          setFactures(INITIAL_FACTURES);
-        }
-      } else {
-        setFactures(INITIAL_FACTURES);
-        localStorage.setItem(LOCAL_STORAGE_KEY_FACTURES, JSON.stringify(INITIAL_FACTURES));
-      }
-
-      const storedPays = localStorage.getItem(LOCAL_STORAGE_KEY_PAIEMENTS);
-      if (storedPays) {
-        try {
-          setPaiements(JSON.parse(storedPays));
-        } catch {
-          setPaiements(INITIAL_PAIEMENTS);
-        }
-      } else {
-        localStorage.setItem(LOCAL_STORAGE_KEY_PAIEMENTS, JSON.stringify(INITIAL_PAIEMENTS));
-      }
-
-      const storedProds = localStorage.getItem(LOCAL_STORAGE_KEY_PRODUITS);
-      if (storedProds) {
-        try {
-          const parsedProds: Produit[] = JSON.parse(storedProds);
-          const missingProds = INITIAL_PRODUITS.filter(
-            (init) => !parsedProds.some((p) => p.id === init.id || p.sku === init.sku)
-          );
-          const fullProds = [...parsedProds, ...missingProds];
-          setProduits(fullProds);
-          localStorage.setItem(LOCAL_STORAGE_KEY_PRODUITS, JSON.stringify(fullProds));
-        } catch {
-          setProduits(INITIAL_PRODUITS);
-        }
-      } else {
-        setProduits(INITIAL_PRODUITS);
-        localStorage.setItem(LOCAL_STORAGE_KEY_PRODUITS, JSON.stringify(INITIAL_PRODUITS));
-      }
-
-      const storedSettings = localStorage.getItem(LOCAL_STORAGE_KEY_SETTINGS);
-      if (storedSettings) {
-        try {
-          setCompanySettings({ ...DEFAULT_COMPANY_SETTINGS, ...JSON.parse(storedSettings) });
-        } catch {
-          setCompanySettings(DEFAULT_COMPANY_SETTINGS);
-        }
-      } else {
-        localStorage.setItem(LOCAL_STORAGE_KEY_SETTINGS, JSON.stringify(DEFAULT_COMPANY_SETTINGS));
-      }
-
-      const storedNotifs = localStorage.getItem(LOCAL_STORAGE_KEY_NOTIFICATIONS);
-      if (storedNotifs) {
-        try {
-          setNotifications(JSON.parse(storedNotifs));
-        } catch {
-          setNotifications(INITIAL_NOTIFICATIONS);
-        }
-      } else {
-        localStorage.setItem(LOCAL_STORAGE_KEY_NOTIFICATIONS, JSON.stringify(INITIAL_NOTIFICATIONS));
-      }
     } catch (e) {
-      console.warn('Could not read from localStorage', e);
-    } finally {
-      setIsHydrated(true);
+      console.warn('Could not read theme from localStorage', e);
     }
   }, []);
-
-  // Save clients to localStorage
-  useEffect(() => {
-    if (isHydrated) {
-      try {
-        localStorage.setItem(LOCAL_STORAGE_KEY_CLIENTS, JSON.stringify(clients));
-      } catch (e) {
-        console.warn('Could not save clients to localStorage', e);
-      }
-    }
-  }, [clients, isHydrated]);
-
-  // Save commandes to localStorage
-  useEffect(() => {
-    if (isHydrated) {
-      try {
-        localStorage.setItem(LOCAL_STORAGE_KEY_COMMANDES, JSON.stringify(commandes));
-      } catch (e) {
-        console.warn('Could not save commandes to localStorage', e);
-      }
-    }
-  }, [commandes, isHydrated]);
-
-  // Save factures to localStorage
-  useEffect(() => {
-    if (isHydrated) {
-      try {
-        localStorage.setItem(LOCAL_STORAGE_KEY_FACTURES, JSON.stringify(factures));
-      } catch (e) {
-        console.warn('Could not save factures to localStorage', e);
-      }
-    }
-  }, [factures, isHydrated]);
-
-  // Save paiements to localStorage
-  useEffect(() => {
-    if (isHydrated) {
-      try {
-        localStorage.setItem(LOCAL_STORAGE_KEY_PAIEMENTS, JSON.stringify(paiements));
-      } catch (e) {
-        console.warn('Could not save paiements to localStorage', e);
-      }
-    }
-  }, [paiements, isHydrated]);
-
-  // Save produits to localStorage
-  useEffect(() => {
-    if (isHydrated) {
-      try {
-        localStorage.setItem(LOCAL_STORAGE_KEY_PRODUITS, JSON.stringify(produits));
-      } catch (e) {
-        console.warn('Could not save produits to localStorage', e);
-      }
-    }
-  }, [produits, isHydrated]);
-
-  // Save notifications to localStorage
-  useEffect(() => {
-    if (isHydrated) {
-      try {
-        localStorage.setItem(LOCAL_STORAGE_KEY_NOTIFICATIONS, JSON.stringify(notifications));
-      } catch (e) {
-        console.warn('Could not save notifications to localStorage', e);
-      }
-    }
-  }, [notifications, isHydrated]);
 
   // Notifications Helpers
   const unreadNotificationsCount = notifications.filter((n) => !n.read).length;
@@ -1419,7 +1403,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const addClient = (
     newClientData: Omit<Client, 'id' | 'createdAt' | 'commandesCount' | 'totalDepense' | 'soldeDu' | 'delaiPaiement'>
   ): Client => {
-    const nextId = String(Date.now());
+    const nextId = generateUUID();
     const dateStr = new Date().toISOString().slice(0, 10);
     const createdClient: Client = {
       ...newClientData,
@@ -1432,6 +1416,32 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     };
 
     setClients((prev) => [createdClient, ...prev]);
+
+    if (user) {
+      supabase.from('clients').insert({
+        id: nextId,
+        user_id: user.id,
+        nom: createdClient.nom,
+        prenom: createdClient.prenom,
+        entreprise: createdClient.entreprise,
+        email: createdClient.email,
+        telephone: createdClient.telephone,
+        adresse: createdClient.adresse,
+        ville: createdClient.ville,
+        code_postal: createdClient.codePostal,
+        pays: createdClient.pays || 'Sénégal',
+        ninea: createdClient.ninea,
+        statut: createdClient.statut,
+        commandes_count: 0,
+        total_depense: 0,
+        solde_du: 0,
+        delai_paiement: '30 Jours',
+      }).then((res: any) => {
+        const error = res?.error;
+        if (error) console.error('Error inserting client into Supabase:', error);
+      });
+    }
+
     showToast(`Client "${createdClient.prenom} ${createdClient.nom}" créé avec succès !`, 'success');
     return createdClient;
   };
@@ -1440,12 +1450,41 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setClients((prev) =>
       prev.map((c) => (c.id === id ? { ...c, ...updates } : c))
     );
+
+    if (user && isValidUUID(id)) {
+      supabase.from('clients').update({
+        nom: updates.nom,
+        prenom: updates.prenom,
+        entreprise: updates.entreprise,
+        email: updates.email,
+        telephone: updates.telephone,
+        adresse: updates.adresse,
+        ville: updates.ville,
+        code_postal: updates.codePostal,
+        pays: updates.pays,
+        ninea: updates.ninea,
+        statut: updates.statut,
+        solde_du: updates.soldeDu,
+      }).eq('id', id).eq('user_id', user.id).then((res: any) => {
+        const error = res?.error;
+        if (error) console.error('Error updating client in Supabase:', error);
+      });
+    }
+
     showToast('Coordonnées du client mises à jour !', 'success');
   };
 
   const deleteClient = (id: string) => {
     const target = clients.find((c) => c.id === id);
     setClients((prev) => prev.filter((c) => c.id !== id));
+
+    if (user && isValidUUID(id)) {
+      supabase.from('clients').delete().eq('id', id).eq('user_id', user.id).then((res: any) => {
+        const error = res?.error;
+        if (error) console.error('Error deleting client from Supabase:', error);
+      });
+    }
+
     showToast(`Client ${target ? `"${target.prenom} ${target.nom}"` : ''} supprimé.`, 'info');
   };
 
@@ -1454,23 +1493,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const trimmed = id.trim();
     const lower = trimmed.toLowerCase();
     const numPart = trimmed.replace(/^cli-?0*/i, '');
-    return (
-      clients.find(
-        (c) =>
-          c.id === trimmed ||
-          c.id === numPart ||
-          c.id.toLowerCase() === lower ||
-          `${c.prenom} ${c.nom}`.toLowerCase().includes(lower) ||
-          c.entreprise.toLowerCase().includes(lower)
-      ) ||
-      INITIAL_CLIENTS.find(
-        (c) =>
-          c.id === trimmed ||
-          c.id === numPart ||
-          c.id.toLowerCase() === lower ||
-          `${c.prenom} ${c.nom}`.toLowerCase().includes(lower) ||
-          c.entreprise.toLowerCase().includes(lower)
-      )
+    return clients.find(
+      (c) =>
+        c.id === trimmed ||
+        c.id === numPart ||
+        c.id.toLowerCase() === lower ||
+        `${c.prenom} ${c.nom}`.toLowerCase().includes(lower) ||
+        c.entreprise.toLowerCase().includes(lower)
     );
   };
 
@@ -1490,8 +1519,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const addCommande = (
     commandeData: Omit<Commande, 'id' | 'numero' | 'dateCreation'>
   ): Commande => {
-    const nextId = String(Date.now());
-    const randomNum = 48 + commandes.length;
+    const nextId = generateUUID();
+    const randomNum = 1 + commandes.length;
     const padNum = String(randomNum).padStart(4, '0');
     const numero = `CMD-2026-${padNum}`;
     const today = new Date();
@@ -1499,7 +1528,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
     const newCmd: Commande = {
       ...commandeData,
-      creeePar: commandeData.creeePar || userProfile?.full_name || user?.user_metadata?.full_name || 'Konrad Chirel',
+      creeePar: commandeData.creeePar || userProfile?.full_name || user?.user_metadata?.full_name || 'Admin',
       id: nextId,
       numero,
       dateCreation,
@@ -1507,7 +1536,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
     setCommandes((prev) => [newCmd, ...prev]);
 
-    // Synchronize client stats
+    // Synchronize client stats in local state
     if (commandeData.clientId) {
       setClients((prev) =>
         prev.map((c) => {
@@ -1523,6 +1552,42 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       );
     }
 
+    if (user) {
+      supabase.from('commandes').insert({
+        id: nextId,
+        user_id: user.id,
+        numero,
+        client_id: isValidUUID(newCmd.clientId) ? newCmd.clientId : null,
+        client_nom: newCmd.clientNom,
+        client_email: newCmd.clientEmail,
+        date_creation: dateCreation,
+        date_livraison: newCmd.dateLivraison,
+        creee_par: newCmd.creeePar,
+        statut: newCmd.statut,
+        articles: newCmd.articles,
+        total_ht: newCmd.totalHT,
+        tva: newCmd.tva,
+        total_ttc: newCmd.totalTTC,
+        notes: newCmd.notes,
+      }).then((res: any) => {
+        const error = res?.error;
+        if (error) console.error('Error inserting commande into Supabase:', error);
+      });
+
+      if (isValidUUID(commandeData.clientId)) {
+        const targetClient = clients.find((c) => c.id === commandeData.clientId);
+        if (targetClient) {
+          supabase.from('clients').update({
+            commandes_count: targetClient.commandesCount + 1,
+            total_depense: targetClient.totalDepense + newCmd.totalTTC,
+          }).eq('id', commandeData.clientId).eq('user_id', user.id).then((res: any) => {
+        const error = res?.error;
+            if (error) console.error('Error updating client commande count in Supabase:', error);
+          });
+        }
+      }
+    }
+
     showToast(`Commande ${numero} créée avec succès !`, 'success');
     return newCmd;
   };
@@ -1531,6 +1596,22 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setCommandes((prev) =>
       prev.map((c) => (c.id === id ? { ...c, ...updates } : c))
     );
+
+    if (user && isValidUUID(id)) {
+      supabase.from('commandes').update({
+        statut: updates.statut,
+        articles: updates.articles,
+        total_ht: updates.totalHT,
+        tva: updates.tva,
+        total_ttc: updates.totalTTC,
+        date_livraison: updates.dateLivraison,
+        notes: updates.notes,
+      }).eq('id', id).eq('user_id', user.id).then((res: any) => {
+        const error = res?.error;
+        if (error) console.error('Error updating commande in Supabase:', error);
+      });
+    }
+
     showToast('Commande mise à jour avec succès.', 'success');
   };
 
@@ -1546,12 +1627,28 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setCommandes((prev) =>
       prev.map((c) => (c.id === id ? { ...c, statut: newStatus } : c))
     );
+
+    if (user && isValidUUID(id)) {
+      supabase.from('commandes').update({ statut: newStatus }).eq('id', id).eq('user_id', user.id).then((res: any) => {
+        const error = res?.error;
+        if (error) console.error('Error updating commande status in Supabase:', error);
+      });
+    }
+
     showToast(`Statut mis à jour : ${labels[newStatus]}`, 'success');
   };
 
   const deleteCommande = (id: string) => {
     const target = commandes.find((c) => c.id === id);
     setCommandes((prev) => prev.filter((c) => c.id !== id));
+
+    if (user && isValidUUID(id)) {
+      supabase.from('commandes').delete().eq('id', id).eq('user_id', user.id).then((res: any) => {
+        const error = res?.error;
+        if (error) console.error('Error deleting commande from Supabase:', error);
+      });
+    }
+
     showToast(`Commande ${target ? target.numero : ''} supprimée.`, 'info');
   };
 
@@ -1560,23 +1657,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const trimmed = id.trim();
     const lower = trimmed.toLowerCase();
     const cleanNum = trimmed.replace(/^cmd-?/i, '').replace(/^\d{4}-/, '').toLowerCase();
-    return (
-      commandes.find(
-        (c) =>
-          c.id === trimmed ||
-          c.numero === trimmed ||
-          c.numero.toLowerCase() === lower ||
-          c.numero.toLowerCase().endsWith(lower) ||
-          c.numero.replace(/^CMD-?/i, '').replace(/^\d{4}-/, '').toLowerCase() === cleanNum
-      ) ||
-      INITIAL_COMMANDES.find(
-        (c) =>
-          c.id === trimmed ||
-          c.numero === trimmed ||
-          c.numero.toLowerCase() === lower ||
-          c.numero.toLowerCase().endsWith(lower) ||
-          c.numero.replace(/^CMD-?/i, '').replace(/^\d{4}-/, '').toLowerCase() === cleanNum
-      )
+    return commandes.find(
+      (c) =>
+        c.id === trimmed ||
+        c.numero === trimmed ||
+        c.numero.toLowerCase() === lower ||
+        c.numero.toLowerCase().endsWith(lower) ||
+        c.numero.replace(/^CMD-?/i, '').replace(/^\d{4}-/, '').toLowerCase() === cleanNum
     );
   };
 
@@ -1584,8 +1671,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const addFacture = (
     factureData: Omit<Facture, 'id' | 'numero' | 'dateEmission'>
   ): Facture => {
-    const nextId = 'fac-' + Date.now();
-    const randomNum = 140 + factures.length;
+    const nextId = generateUUID();
+    const randomNum = 1 + factures.length;
     const numero = `FAC-2026-${String(randomNum).padStart(4, '0')}`;
     const today = new Date();
     const dateEmission = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
@@ -1611,6 +1698,44 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       );
     }
 
+    if (user) {
+      supabase.from('factures').insert({
+        id: nextId,
+        user_id: user.id,
+        numero,
+        commande_id: isValidUUID(newFacture.commandeId) ? newFacture.commandeId : null,
+        client_id: isValidUUID(newFacture.clientId) ? newFacture.clientId : null,
+        client_nom: newFacture.clientNom,
+        client_adresse: newFacture.clientAdresse,
+        client_email: newFacture.clientEmail,
+        client_siret: newFacture.clientSiret,
+        statut: newFacture.statut,
+        articles: newFacture.articles,
+        total_ht: newFacture.totalHT,
+        tva: newFacture.tva,
+        total_ttc: newFacture.totalTTC,
+        reste_du: newFacture.resteDu,
+        montant_paye: newFacture.montantPaye,
+        date_emission: dateEmission,
+        date_echeance: newFacture.dateEcheance,
+      }).then((res: any) => {
+        const error = res?.error;
+        if (error) console.error('Error inserting facture into Supabase:', error);
+      });
+
+      if (newFacture.resteDu > 0 && isValidUUID(newFacture.clientId)) {
+        const targetClient = clients.find((c) => c.id === newFacture.clientId);
+        if (targetClient) {
+          supabase.from('clients').update({
+            solde_du: (targetClient.soldeDu || 0) + newFacture.resteDu,
+          }).eq('id', newFacture.clientId).eq('user_id', user.id).then((res: any) => {
+        const error = res?.error;
+            if (error) console.error('Error updating client soldeDu in Supabase:', error);
+          });
+        }
+      }
+    }
+
     showToast(`Facture ${numero} créée avec succès !`, 'success');
     return newFacture;
   };
@@ -1619,6 +1744,23 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setFactures((prev) =>
       prev.map((f) => (f.id === id || f.numero === id ? { ...f, ...updates } : f))
     );
+
+    if (user && isValidUUID(id)) {
+      supabase.from('factures').update({
+        statut: updates.statut,
+        articles: updates.articles,
+        total_ht: updates.totalHT,
+        tva: updates.tva,
+        total_ttc: updates.totalTTC,
+        montant_paye: updates.montantPaye,
+        reste_du: updates.resteDu,
+        date_echeance: updates.dateEcheance,
+      }).eq('id', id).eq('user_id', user.id).then((res: any) => {
+        const error = res?.error;
+        if (error) console.error('Error updating facture in Supabase:', error);
+      });
+    }
+
     showToast('Facture mise à jour avec succès.', 'success');
   };
 
@@ -1637,29 +1779,25 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         return f;
       })
     );
+
+    if (user && isValidUUID(id)) {
+      supabase.from('factures').update({ statut: newStatus }).eq('id', id).eq('user_id', user.id).then((res: any) => {
+        const error = res?.error;
+        if (error) console.error('Error updating facture status in Supabase:', error);
+      });
+    }
+
     showToast('Statut de la facture mis à jour.', 'success');
   };
 
   const markFactureAsPaid = (id: string) => {
-    const target = factures.find((f) => f.id === id || f.numero === id) || INITIAL_FACTURES.find((f) => f.id === id || f.numero === id);
+    const target = factures.find((f) => f.id === id || f.numero === id);
     if (!target) return;
 
     const amountPaid = target.resteDu > 0 ? target.resteDu : target.totalTTC;
 
-    setFactures((prev) => {
-      const exists = prev.some((f) => f.id === target.id || f.numero === target.numero);
-      if (!exists) {
-        return [
-          {
-            ...target,
-            statut: 'payee',
-            montantPaye: target.totalTTC,
-            resteDu: 0,
-          },
-          ...prev,
-        ];
-      }
-      return prev.map((f) =>
+    setFactures((prev) =>
+      prev.map((f) =>
         f.id === target.id || f.numero === target.numero
           ? {
               ...f,
@@ -1668,11 +1806,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
               resteDu: 0,
             }
           : f
-      );
-    });
+      )
+    );
 
+    const paymentId = generateUUID();
     const newPayment: Paiement = {
-      id: String(Date.now()),
+      id: paymentId,
       reference: `PAY-${target.numero.replace('FAC-', '')}`,
       factureId: target.id,
       factureNumero: target.numero,
@@ -1696,12 +1835,51 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       );
     }
 
+    if (user) {
+      if (isValidUUID(target.id)) {
+        supabase.from('factures').update({
+          statut: 'payee',
+          montant_paye: target.totalTTC,
+          reste_du: 0,
+        }).eq('id', target.id).eq('user_id', user.id).then((res: any) => {
+        const error = res?.error;
+          if (error) console.error('Error updating facture paid state in Supabase:', error);
+        });
+      }
+
+      supabase.from('paiements').insert({
+        id: paymentId,
+        user_id: user.id,
+        reference: newPayment.reference,
+        facture_id: isValidUUID(target.id) ? target.id : null,
+        facture_numero: target.numero,
+        client_id: isValidUUID(target.clientId) ? target.clientId : null,
+        client_nom: target.clientNom,
+        montant: amountPaid,
+        methode: 'virement',
+        date: newPayment.date,
+        statut: 'reussi',
+        notes: newPayment.notes,
+      }).then((res: any) => {
+        const error = res?.error;
+        if (error) console.error('Error inserting payment in Supabase:', error);
+      });
+    }
+
     showToast(`Facture ${target.numero} marquée comme payée (Paiement ${newPayment.reference} enregistré).`, 'success');
   };
 
   const deleteFacture = (id: string) => {
     const target = factures.find((f) => f.id === id || f.numero === id);
     setFactures((prev) => prev.filter((f) => f.id !== id && f.numero !== id));
+
+    if (user && isValidUUID(id)) {
+      supabase.from('factures').delete().eq('id', id).eq('user_id', user.id).then((res: any) => {
+        const error = res?.error;
+        if (error) console.error('Error deleting facture from Supabase:', error);
+      });
+    }
+
     showToast(`Facture ${target ? target.numero : ''} supprimée.`, 'info');
   };
 
@@ -1709,20 +1887,16 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     if (!id) return undefined;
     const trimmed = id.trim();
     const lower = trimmed.toLowerCase();
-    return (
-      factures.find(
-        (f) => f.id === trimmed || f.numero === trimmed || f.numero.toLowerCase() === lower
-      ) ||
-      INITIAL_FACTURES.find(
-        (f) => f.id === trimmed || f.numero === trimmed || f.numero.toLowerCase() === lower
-      )
+    return factures.find(
+      (f) => f.id === trimmed || f.numero === trimmed || f.numero.toLowerCase() === lower
     );
   };
 
   const addPaiement = (paiementData: Omit<Paiement, 'id'>): Paiement => {
+    const nextId = generateUUID();
     const newPayment: Paiement = {
       ...paiementData,
-      id: 'pay-' + Date.now(),
+      id: nextId,
     };
     setPaiements((prev) => [newPayment, ...prev]);
 
@@ -1756,6 +1930,26 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       );
     }
 
+    if (user) {
+      supabase.from('paiements').insert({
+        id: nextId,
+        user_id: user.id,
+        reference: newPayment.reference,
+        facture_id: isValidUUID(newPayment.factureId) ? newPayment.factureId : null,
+        facture_numero: newPayment.factureNumero,
+        client_id: isValidUUID(newPayment.clientId) ? newPayment.clientId : null,
+        client_nom: newPayment.clientNom,
+        montant: newPayment.montant,
+        methode: newPayment.methode,
+        date: newPayment.date,
+        statut: newPayment.statut,
+        notes: newPayment.notes,
+      }).then((res: any) => {
+        const error = res?.error;
+        if (error) console.error('Error inserting paiement into Supabase:', error);
+      });
+    }
+
     showToast(`Paiement de ${formatCurrency(newPayment.montant)} enregistré avec succès.`, 'success');
     return newPayment;
   };
@@ -1764,7 +1958,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const addProduit = (
     produitData: Omit<Produit, 'id' | 'createdAt'>
   ): Produit => {
-    const nextId = 'prod-' + Date.now();
+    const nextId = generateUUID();
     const dateStr = new Date().toISOString().slice(0, 10);
     let icon = produitData.icon;
     if (!icon) {
@@ -1783,6 +1977,25 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     };
 
     setProduits((prev) => [newProduit, ...prev]);
+
+    if (user) {
+      supabase.from('produits').insert({
+        id: nextId,
+        user_id: user.id,
+        nom: newProduit.nom,
+        sku: newProduit.sku,
+        categorie: newProduit.categorie,
+        description: newProduit.description,
+        prix_ht: newProduit.prix,
+        tva: newProduit.tva,
+        stock: newProduit.stock,
+        statut: newProduit.stock > 0 ? 'disponible' : 'rupture',
+      }).then((res: any) => {
+        const error = res?.error;
+        if (error) console.error('Error inserting produit into Supabase:', error);
+      });
+    }
+
     showToast(`Produit "${newProduit.nom}" créé avec succès !`, 'success');
     return newProduit;
   };
@@ -1791,12 +2004,37 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setProduits((prev) =>
       prev.map((p) => (p.id === id || p.sku === id ? { ...p, ...updates } : p))
     );
+
+    if (user && isValidUUID(id)) {
+      supabase.from('produits').update({
+        nom: updates.nom,
+        sku: updates.sku,
+        categorie: updates.categorie,
+        description: updates.description,
+        prix_ht: updates.prix,
+        tva: updates.tva,
+        stock: updates.stock,
+        statut: (updates.stock ?? 1) > 0 ? 'disponible' : 'rupture',
+      }).eq('id', id).eq('user_id', user.id).then((res: any) => {
+        const error = res?.error;
+        if (error) console.error('Error updating produit in Supabase:', error);
+      });
+    }
+
     showToast('Produit mis à jour avec succès.', 'success');
   };
 
   const deleteProduit = (id: string) => {
     const target = produits.find((p) => p.id === id || p.sku === id);
     setProduits((prev) => prev.filter((p) => p.id !== id && p.sku !== id));
+
+    if (user && isValidUUID(id)) {
+      supabase.from('produits').delete().eq('id', id).eq('user_id', user.id).then((res: any) => {
+        const error = res?.error;
+        if (error) console.error('Error deleting produit from Supabase:', error);
+      });
+    }
+
     showToast(`Produit ${target ? `"${target.nom}"` : ''} supprimé.`, 'info');
   };
 
@@ -1804,22 +2042,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     if (!id) return undefined;
     const trimmed = id.trim();
     const lower = trimmed.toLowerCase();
-    return (
-      produits.find((p) => p.id === trimmed || p.sku.toLowerCase() === lower) ||
-      INITIAL_PRODUITS.find((p) => p.id === trimmed || p.sku.toLowerCase() === lower)
-    );
+    return produits.find((p) => p.id === trimmed || p.sku.toLowerCase() === lower);
   };
 
   const updateCompanySettings = async (updates: Partial<CompanySettings>) => {
-    setCompanySettings((prev) => {
-      const updated = { ...prev, ...updates };
-      try {
-        localStorage.setItem(LOCAL_STORAGE_KEY_SETTINGS, JSON.stringify(updated));
-      } catch (e) {
-        console.warn('Could not save company settings to localStorage', e);
-      }
-      return updated;
-    });
+    setCompanySettings((prev) => ({ ...prev, ...updates }));
 
     if (user) {
       try {
@@ -1855,20 +2082,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   const resetToDefaultData = () => {
-    setClients(INITIAL_CLIENTS);
-    setCommandes(INITIAL_COMMANDES);
-    setFactures(INITIAL_FACTURES);
-    setPaiements(INITIAL_PAIEMENTS);
-    setProduits(INITIAL_PRODUITS);
-    setNotifications(INITIAL_NOTIFICATIONS);
-    setCompanySettings(DEFAULT_COMPANY_SETTINGS);
-    localStorage.setItem(LOCAL_STORAGE_KEY_CLIENTS, JSON.stringify(INITIAL_CLIENTS));
-    localStorage.setItem(LOCAL_STORAGE_KEY_COMMANDES, JSON.stringify(INITIAL_COMMANDES));
-    localStorage.setItem(LOCAL_STORAGE_KEY_FACTURES, JSON.stringify(INITIAL_FACTURES));
-    localStorage.setItem(LOCAL_STORAGE_KEY_PAIEMENTS, JSON.stringify(INITIAL_PAIEMENTS));
-    localStorage.setItem(LOCAL_STORAGE_KEY_PRODUITS, JSON.stringify(INITIAL_PRODUITS));
-    localStorage.setItem(LOCAL_STORAGE_KEY_NOTIFICATIONS, JSON.stringify(INITIAL_NOTIFICATIONS));
-    localStorage.setItem(LOCAL_STORAGE_KEY_SETTINGS, JSON.stringify(DEFAULT_COMPANY_SETTINGS));
+    setClients([]);
+    setCommandes([]);
+    setFactures([]);
+    setPaiements([]);
+    setProduits([]);
+    setNotifications([]);
     showToast('Données réinitialisées avec succès.', 'info');
   };
 

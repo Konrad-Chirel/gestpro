@@ -8,9 +8,9 @@ export default function Dashboard() {
   const { clients, commandes, factures, formatCurrency, t, user, userProfile } = useStore();
 
   const storedName = typeof window !== 'undefined' ? localStorage.getItem('gestpro_user_name') : null;
-  const displayName = userProfile?.full_name || user?.user_metadata?.full_name || storedName || 'Konrad';
-  const firstName = displayName.trim().split(' ')[0] || 'Konrad';
-  const greeting = `${t('dashboard.welcome')}, ${firstName}`;
+  const displayName = userProfile?.full_name || user?.user_metadata?.full_name || storedName || '';
+  const firstName = displayName ? displayName.trim().split(' ')[0] : '';
+  const greeting = firstName ? `${t('dashboard.welcome')}, ${firstName}` : t('dashboard.welcome');
 
   const stats = useMemo(() => {
     // 1. Chiffre d'affaires : Total encaissé (montantPaye) sur toutes les factures
@@ -30,14 +30,14 @@ export default function Dashboard() {
     const clientsActifsCount = clients.filter((c) => c.statut === 'actif').length;
 
     // 5. Répartition des statuts de factures (Donut)
-    const totalFac = factures.length || 1;
+    const totalFac = factures.length;
     const payeesCount = factures.filter((f) => f.statut === 'payee').length;
     const attenteCount = factures.filter((f) => f.statut === 'attente').length;
     const retardCount = factures.filter((f) => f.statut === 'retard').length;
 
-    const pctPaye = Math.round((payeesCount / totalFac) * 100);
-    const pctAttente = Math.round((attenteCount / totalFac) * 100);
-    const pctRetard = Math.max(0, 100 - pctPaye - pctAttente);
+    const pctPaye = totalFac > 0 ? Math.round((payeesCount / totalFac) * 100) : 0;
+    const pctAttente = totalFac > 0 ? Math.round((attenteCount / totalFac) * 100) : 0;
+    const pctRetard = totalFac > 0 ? Math.max(0, 100 - pctPaye - pctAttente) : 0;
 
     // Circonférence cercle SVG (r=40) = 251.2
     const circ = 251.2;
@@ -59,6 +59,7 @@ export default function Dashboard() {
       facturesImpayeesCount,
       totalResteDu,
       clientsActifsCount,
+      totalFac,
       pctPaye,
       pctAttente,
       pctRetard,
@@ -280,45 +281,66 @@ export default function Dashboard() {
             </Link>
           </div>
           <div className="flex flex-col gap-2 overflow-x-auto pb-2 hide-scrollbar">
-            <div className="min-w-[400px] flex flex-col gap-2">
-              {stats.recentOrders.map((cmd) => (
+            {stats.recentOrders.length === 0 ? (
+              <div className="flex flex-col items-center justify-center p-8 text-center rounded-xl border border-dashed border-border-base bg-surface-container-lowest/50 my-1">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-3">
+                  <span className="material-symbols-outlined text-[24px]">shopping_cart</span>
+                </div>
+                <p className="text-sm font-semibold text-text-primary mb-1">
+                  {t('dashboard.no_orders_yet') || 'Aucune commande pour le moment'}
+                </p>
+                <p className="text-xs text-text-secondary mb-4 max-w-xs">
+                  {t('dashboard.create_order_desc') || 'Créez votre première commande pour suivre vos ventes en temps réel.'}
+                </p>
                 <Link
-                  key={cmd.id}
-                  href={`/dashboard/commandes/${cmd.id}`}
-                  className="flex items-center justify-between p-3.5 sm:p-4 bg-surface-container-lowest rounded-lg hover:bg-surface-container-high transition-colors group cursor-pointer gap-3"
+                  href="/dashboard/commandes/nouveau"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-on-primary text-xs font-semibold hover:bg-primary-hover transition-colors shadow-sm"
                 >
-                  <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-                    <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-text-secondary group-hover:bg-primary/20 group-hover:text-primary transition-colors shrink-0">
-                      <span className="material-symbols-outlined text-[20px]">shopping_bag</span>
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-label-md font-label-md text-text-primary truncate">{cmd.numero}</span>
-                      <span className="text-label-sm font-label-sm text-text-secondary truncate">{cmd.clientNom}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 sm:gap-5 shrink-0">
-                    <span className="text-sm sm:text-base font-semibold text-text-primary whitespace-nowrap text-right min-w-[100px] sm:min-w-[130px]">
-                      {formatCurrency(cmd.totalTTC || 0)}
-                    </span>
-                    {cmd.statut === 'livree' && (
-                      <span className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-label-sm font-semibold px-3 py-1 rounded-full w-24 text-center shrink-0">{t('status.delivered')}</span>
-                    )}
-                    {cmd.statut === 'confirmee' && (
-                      <span className="bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 text-label-sm font-semibold px-3 py-1 rounded-full w-24 text-center shrink-0">{t('status.confirmed')}</span>
-                    )}
-                    {cmd.statut === 'preparation' && (
-                      <span className="bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/25 text-label-sm font-semibold px-3 py-1 rounded-full w-24 text-center shrink-0">{t('status.preparing')}</span>
-                    )}
-                    {cmd.statut === 'attente' && (
-                      <span className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25 text-label-sm font-semibold px-3 py-1 rounded-full w-24 text-center shrink-0">{t('status.pending')}</span>
-                    )}
-                    {cmd.statut === 'annulee' && (
-                      <span className="bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-label-sm font-semibold px-3 py-1 rounded-full w-24 text-center shrink-0">{t('status.cancelled')}</span>
-                    )}
-                  </div>
+                  <span className="material-symbols-outlined text-[16px]">add</span>
+                  <span>{t('dashboard.new_order') || 'Créer une commande'}</span>
                 </Link>
-              ))}
-            </div>
+              </div>
+            ) : (
+              <div className="min-w-[400px] flex flex-col gap-2">
+                {stats.recentOrders.map((cmd) => (
+                  <Link
+                    key={cmd.id}
+                    href={`/dashboard/commandes/${cmd.id}`}
+                    className="flex items-center justify-between p-3.5 sm:p-4 bg-surface-container-lowest rounded-lg hover:bg-surface-container-high transition-colors group cursor-pointer gap-3"
+                  >
+                    <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                      <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-text-secondary group-hover:bg-primary/20 group-hover:text-primary transition-colors shrink-0">
+                        <span className="material-symbols-outlined text-[20px]">shopping_bag</span>
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-label-md font-label-md text-text-primary truncate">{cmd.numero}</span>
+                        <span className="text-label-sm font-label-sm text-text-secondary truncate">{cmd.clientNom}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 sm:gap-5 shrink-0">
+                      <span className="text-sm sm:text-base font-semibold text-text-primary whitespace-nowrap text-right min-w-[100px] sm:min-w-[130px]">
+                        {formatCurrency(cmd.totalTTC || 0)}
+                      </span>
+                      {cmd.statut === 'livree' && (
+                        <span className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-label-sm font-semibold px-3 py-1 rounded-full w-24 text-center shrink-0">{t('status.delivered')}</span>
+                      )}
+                      {cmd.statut === 'confirmee' && (
+                        <span className="bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 text-label-sm font-semibold px-3 py-1 rounded-full w-24 text-center shrink-0">{t('status.confirmed')}</span>
+                      )}
+                      {cmd.statut === 'preparation' && (
+                        <span className="bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/25 text-label-sm font-semibold px-3 py-1 rounded-full w-24 text-center shrink-0">{t('status.preparing')}</span>
+                      )}
+                      {cmd.statut === 'attente' && (
+                        <span className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25 text-label-sm font-semibold px-3 py-1 rounded-full w-24 text-center shrink-0">{t('status.pending')}</span>
+                      )}
+                      {cmd.statut === 'annulee' && (
+                        <span className="bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-label-sm font-semibold px-3 py-1 rounded-full w-24 text-center shrink-0">{t('status.cancelled')}</span>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         </div>
         
@@ -331,42 +353,63 @@ export default function Dashboard() {
             </Link>
           </div>
           <div className="flex flex-col gap-2 overflow-x-auto pb-2 hide-scrollbar">
-            <div className="min-w-[400px] flex flex-col gap-2">
-              {stats.recentInvoices.map((fac) => (
+            {stats.recentInvoices.length === 0 ? (
+              <div className="flex flex-col items-center justify-center p-8 text-center rounded-xl border border-dashed border-border-base bg-surface-container-lowest/50 my-1">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-3">
+                  <span className="material-symbols-outlined text-[24px]">receipt_long</span>
+                </div>
+                <p className="text-sm font-semibold text-text-primary mb-1">
+                  {t('dashboard.no_invoices_yet') || 'Aucune facture émise'}
+                </p>
+                <p className="text-xs text-text-secondary mb-4 max-w-xs">
+                  {t('dashboard.create_invoice_desc') || 'Générez votre première facture pour encaisser vos règlements.'}
+                </p>
                 <Link
-                  key={fac.id}
-                  href={`/dashboard/factures/${fac.id}`}
-                  className="flex items-center justify-between p-3.5 sm:p-4 bg-surface-container-lowest rounded-lg hover:bg-surface-container-high transition-colors group cursor-pointer gap-3"
+                  href="/dashboard/factures/nouveau"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-on-primary text-xs font-semibold hover:bg-primary-hover transition-colors shadow-sm"
                 >
-                  <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-                    <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-text-secondary group-hover:bg-primary/20 group-hover:text-primary transition-colors shrink-0">
-                      <span className="material-symbols-outlined text-[20px]">receipt_long</span>
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-label-md font-label-md text-text-primary truncate">{fac.numero}</span>
-                      <span className="text-label-sm font-label-sm text-text-secondary truncate">{fac.clientNom || fac.dateEmission}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 sm:gap-5 shrink-0">
-                    <span className="text-sm sm:text-base font-semibold text-text-primary whitespace-nowrap text-right min-w-[100px] sm:min-w-[130px]">
-                      {formatCurrency(fac.totalTTC || 0)}
-                    </span>
-                    {fac.statut === 'payee' && (
-                      <span className="bg-success/15 text-success text-label-sm font-label-sm px-3 py-1 rounded-full w-24 text-center shrink-0">{t('status.paid')}</span>
-                    )}
-                    {fac.statut === 'attente' && (
-                      <span className="bg-warning/15 text-warning text-label-sm font-label-sm px-3 py-1 rounded-full w-24 text-center shrink-0">{t('status.pending')}</span>
-                    )}
-                    {fac.statut === 'retard' && (
-                      <span className="bg-error/15 text-error text-label-sm font-label-sm px-3 py-1 rounded-full w-24 text-center shrink-0">{t('status.overdue')}</span>
-                    )}
-                    {fac.statut === 'annulee' && (
-                      <span className="bg-surface-container-highest text-text-secondary text-label-sm font-label-sm px-3 py-1 rounded-full w-24 text-center shrink-0">{t('status.cancelled')}</span>
-                    )}
-                  </div>
+                  <span className="material-symbols-outlined text-[16px]">add</span>
+                  <span>{t('dashboard.create_invoice') || 'Créer une facture'}</span>
                 </Link>
-              ))}
-            </div>
+              </div>
+            ) : (
+              <div className="min-w-[400px] flex flex-col gap-2">
+                {stats.recentInvoices.map((fac) => (
+                  <Link
+                    key={fac.id}
+                    href={`/dashboard/factures/${fac.id}`}
+                    className="flex items-center justify-between p-3.5 sm:p-4 bg-surface-container-lowest rounded-lg hover:bg-surface-container-high transition-colors group cursor-pointer gap-3"
+                  >
+                    <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                      <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-text-secondary group-hover:bg-primary/20 group-hover:text-primary transition-colors shrink-0">
+                        <span className="material-symbols-outlined text-[20px]">receipt_long</span>
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-label-md font-label-md text-text-primary truncate">{fac.numero}</span>
+                        <span className="text-label-sm font-label-sm text-text-secondary truncate">{fac.clientNom || fac.dateEmission}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 sm:gap-5 shrink-0">
+                      <span className="text-sm sm:text-base font-semibold text-text-primary whitespace-nowrap text-right min-w-[100px] sm:min-w-[130px]">
+                        {formatCurrency(fac.totalTTC || 0)}
+                      </span>
+                      {fac.statut === 'payee' && (
+                        <span className="bg-success/15 text-success text-label-sm font-label-sm px-3 py-1 rounded-full w-24 text-center shrink-0">{t('status.paid')}</span>
+                      )}
+                      {fac.statut === 'attente' && (
+                        <span className="bg-warning/15 text-warning text-label-sm font-label-sm px-3 py-1 rounded-full w-24 text-center shrink-0">{t('status.pending')}</span>
+                      )}
+                      {fac.statut === 'retard' && (
+                        <span className="bg-error/15 text-error text-label-sm font-label-sm px-3 py-1 rounded-full w-24 text-center shrink-0">{t('status.overdue')}</span>
+                      )}
+                      {fac.statut === 'annulee' && (
+                        <span className="bg-surface-container-highest text-text-secondary text-label-sm font-label-sm px-3 py-1 rounded-full w-24 text-center shrink-0">{t('status.cancelled')}</span>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

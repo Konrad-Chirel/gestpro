@@ -50,8 +50,15 @@ export default function LoginPage() {
         const fullName = data.user.user_metadata?.full_name || '';
         const companyName = data.user.user_metadata?.company_name || '';
         if (typeof window !== 'undefined') {
+          localStorage.removeItem('gestpro_clients_v1');
+          localStorage.removeItem('gestpro_commandes_v1');
+          localStorage.removeItem('gestpro_factures_v1');
+          localStorage.removeItem('gestpro_paiements_v1');
+          localStorage.removeItem('gestpro_produits_v1');
           if (fullName) localStorage.setItem('gestpro_user_name', fullName);
+          else localStorage.removeItem('gestpro_user_name');
           if (companyName) localStorage.setItem('gestpro_company_name', companyName);
+          else localStorage.removeItem('gestpro_company_name');
           if (data.user.email) localStorage.setItem('gestpro_user_email', data.user.email);
         }
       }

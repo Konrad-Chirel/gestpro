@@ -36,14 +36,14 @@ interface ActivityItem {
 export default function HistoriquePage() {
   const { formatCurrency, t, companySettings, commandes, factures, paiements, clients, user, userProfile } = useStore();
 
-  const currentUserName = userProfile?.full_name || user?.user_metadata?.full_name || 'Konrad Chirel';
+  const currentUserName = userProfile?.full_name || user?.user_metadata?.full_name || 'Utilisateur';
   const currentUserInitials = currentUserName
     .split(' ')
     .filter(Boolean)
     .map((w: string) => w[0])
     .slice(0, 2)
     .join('')
-    .toUpperCase() || 'KC';
+    .toUpperCase() || 'GP';
 
   const [activeFilter, setActiveFilter] = useState<FilterType>('tous');
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodFilterType>('7jours');

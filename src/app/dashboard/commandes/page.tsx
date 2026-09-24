@@ -352,7 +352,7 @@ export default function CommandesPage() {
           <p className="font-label-sm text-text-secondary uppercase tracking-widest mb-2">{t('Total Mensuel')}</p>
           <div className="flex items-end gap-2 xl:gap-4 justify-between min-w-0">
             <p className="text-xl sm:text-2xl xl:text-3xl font-bold text-text-primary whitespace-nowrap">
-              {commandes.length > 0 ? commandes.length : 124}
+              {commandes.length}
             </p>
             <div className="w-16 sm:w-20 xl:w-24 h-10 xl:h-12 text-primary shrink-0">
               <svg className="w-full h-full stroke-current fill-none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" viewBox="0 0 100 40">
@@ -367,7 +367,7 @@ export default function CommandesPage() {
           <p className="font-label-sm text-text-secondary uppercase tracking-widest mb-2">{t('En Attente')}</p>
           <div className="flex items-end gap-2 xl:gap-4 justify-between min-w-0">
             <p className="text-xl sm:text-2xl xl:text-3xl font-bold text-text-primary whitespace-nowrap">
-              {totalAttenteCount > 0 ? totalAttenteCount : 18}
+              {totalAttenteCount}
             </p>
             <div className="w-16 sm:w-20 xl:w-24 h-10 xl:h-12 text-warning shrink-0">
               <svg className="w-full h-full stroke-current fill-none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" viewBox="0 0 100 40">
@@ -382,7 +382,7 @@ export default function CommandesPage() {
           <p className="font-label-sm text-text-secondary uppercase tracking-widest mb-2">{t('Revenu (TTC)')}</p>
           <div className="flex items-end gap-2 xl:gap-4 justify-between min-w-0">
             <p className="text-xl sm:text-2xl xl:text-3xl font-bold text-text-primary whitespace-nowrap">
-              {formatCurrency(totalRevenuTTC > 0 ? totalRevenuTTC : 45290)}
+              {formatCurrency(totalRevenuTTC)}
             </p>
             <div className="w-16 sm:w-20 xl:w-24 h-10 xl:h-12 text-success shrink-0">
               <svg className="w-full h-full stroke-current fill-none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" viewBox="0 0 100 40">
@@ -558,7 +558,9 @@ export default function CommandesPage() {
         {/* Pagination */}
         <div className="flex items-center justify-between px-4 py-2 mt-4">
           <span className="font-body-sm text-text-secondary">
-            {t('Affichage de')} 1 {t('à')} {filteredOrders.length} {t('sur')} {commandes.length || 124} {t('commandes')}
+            {commandes.length === 0
+              ? t('0 commande')
+              : `${t('Affichage de')} 1 ${t('à')} ${filteredOrders.length} ${t('sur')} ${commandes.length} ${t('commandes')}`}
           </span>
           <div className="flex gap-2">
             <button

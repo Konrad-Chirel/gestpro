@@ -203,7 +203,7 @@ export default function EnregistrerPaiementPage() {
                   type="number"
                   step={currencyCode === 'XOF' ? '1' : '0.01'}
                   min="0.01"
-                  max={convertPrice(currentFacture.resteDu * 2)}
+                  max={currentFacture ? convertPrice((currentFacture.resteDu || 0) * 2) : undefined}
                   value={montant}
                   onChange={(e) => setMontant(e.target.value)}
                   className="w-full h-12 bg-surface-container border border-border-base rounded-xl pl-12 pr-4 text-base font-bold text-on-surface focus:border-primary focus:outline-none transition-colors shadow-inner"

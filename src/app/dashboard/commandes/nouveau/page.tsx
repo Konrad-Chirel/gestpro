@@ -162,7 +162,7 @@ export default function NouvelleCommandePage() {
         clientNom: `${selectedClient.prenom} ${selectedClient.nom} (${selectedClient.entreprise})`,
         clientEmail: selectedClient.email,
         dateLivraison: dateLivraison || 'À convenir',
-        creeePar: userProfile?.full_name || user?.user_metadata?.full_name || 'Konrad Chirel',
+        creeePar: userProfile?.full_name || user?.user_metadata?.full_name || 'Admin',
         statut: 'attente',
         articles: validItems,
         totalHT: subtotalHT,
