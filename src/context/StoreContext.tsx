@@ -1417,8 +1417,21 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       }
 
       setClients((clientsRes.data || []).map(mapDbClient));
-      setCommandes((commandesRes.data || []).map(mapDbCommande));
-      setFactures((facturesRes.data || []).map(mapDbFacture));
+      const loadedCommandes = (commandesRes.data || []).map(mapDbCommande);
+      setCommandes(loadedCommandes);
+
+      // Enrich factures with commandeNumero by resolving from loaded commandes
+      const loadedFactures = (facturesRes.data || []).map(mapDbFacture).map((fac: Facture) => {
+        if (fac.commandeId && !fac.commandeNumero) {
+          const linkedCmd = loadedCommandes.find((cmd: any) => cmd.id === fac.commandeId);
+          if (linkedCmd) {
+            return { ...fac, commandeNumero: linkedCmd.numero };
+          }
+        }
+        return fac;
+      });
+      setFactures(loadedFactures);
+
       setPaiements((paiementsRes.data || []).map(mapDbPaiement));
       setProduits((produitsRes.data || []).map(mapDbProduit));
     } catch (e) {
@@ -2291,8 +2304,16 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       supabase.from('produits').select('*').eq('user_id', uid).order('created_at', { ascending: false }),
     ]);
     setClients((reClients.data || []).map(mapDbClient));
-    setCommandes((reCommandes.data || []).map(mapDbCommande));
-    setFactures((reFactures.data || []).map(mapDbFacture));
+    const refreshedCommandes = (reCommandes.data || []).map(mapDbCommande);
+    setCommandes(refreshedCommandes);
+    const refreshedFactures = (reFactures.data || []).map(mapDbFacture).map((fac: Facture) => {
+      if (fac.commandeId && !fac.commandeNumero) {
+        const linkedCmd = refreshedCommandes.find((cmd: any) => cmd.id === fac.commandeId);
+        if (linkedCmd) return { ...fac, commandeNumero: linkedCmd.numero };
+      }
+      return fac;
+    });
+    setFactures(refreshedFactures);
     setPaiements((rePaiements.data || []).map(mapDbPaiement));
     setProduits((reProduits.data || []).map(mapDbProduit));
     setNotifications(INITIAL_NOTIFICATIONS);

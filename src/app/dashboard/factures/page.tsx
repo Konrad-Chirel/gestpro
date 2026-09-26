@@ -297,7 +297,7 @@ export default function FacturesPage() {
                       }
                     }}
                   >
-                    {fac.commandeNumero ? fac.commandeNumero.replace(/^CMD-?/i, '').replace(/^\d{4}-/, '') : '—'}
+                    {fac.commandeNumero || '—'}
                   </div>
                   <div className="col-span-3 flex items-center gap-2">
                     <div className="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center font-label-sm text-text-primary border border-border-base text-[10px]">
