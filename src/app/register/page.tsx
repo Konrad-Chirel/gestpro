@@ -119,7 +119,7 @@ export default function RegisterPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`,
+          redirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback?flow=signup`,
           queryParams: {
             prompt: 'select_account',
           },

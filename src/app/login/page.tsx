@@ -1,14 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useStore } from '@/context/StoreContext';
 import { getTranslation } from '@/i18n/translations';
 import { createClient } from '@/lib/supabase/client';
 
 export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginPageContent />
+    </Suspense>
+  );
+}
+
+function LoginPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { theme, toggleTheme, showToast } = useStore();
   const supabase = createClient();
 
@@ -24,6 +33,29 @@ export default function LoginPage() {
       if (saved === 'en' || saved === 'fr') setLang(saved);
     }
   }, []);
+
+  // Show error toast if redirected from callback with an error
+  useEffect(() => {
+    const error = searchParams.get('error');
+    if (error === 'no_account') {
+      showToast(
+        lang === 'en'
+          ? 'No account found with this Google email. Please sign up first.'
+          : "Aucun compte trouvé avec cet email Google. Veuillez d'abord créer un compte.",
+        'error'
+      );
+      // Clean up the URL
+      router.replace('/login');
+    } else if (error === 'auth-code-error') {
+      showToast(
+        lang === 'en'
+          ? 'Authentication error. Please try again.'
+          : "Erreur d'authentification. Veuillez réessayer.",
+        'error'
+      );
+      router.replace('/login');
+    }
+  }, [searchParams]);
 
   const t = (text: string) => getTranslation(text, lang);
 
@@ -76,7 +108,7 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`,
+          redirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback?flow=login`,
           queryParams: {
             prompt: 'select_account',
           },
