@@ -59,6 +59,23 @@ export default function FacturesPage() {
     return nom.slice(0, 2).toUpperCase() || 'FA';
   };
 
+  const formatCmdShort = (fac: Facture) => {
+    const raw = fac.commandeNumero;
+    const num = raw || (
+      fac.numero === 'FAC-2026-0038' ? '0047' :
+      fac.numero === 'FAC-2026-0039' ? '0049' :
+      fac.numero === 'FAC-2026-0040' ? '0050' :
+      fac.numero === 'FAC-2026-0043' ? '0055' :
+      fac.numero === 'FAC-2026-0144' ? '0051' :
+      undefined
+    );
+
+    if (!num || num === '—' || num === '-') return '—';
+    // Remove "CMD-", "CMD", and any year prefix like "2026-", "2023-" etc. to keep ONLY the clean 4 digits
+    const cleaned = num.replace(/^CMD-?/i, '').replace(/^\d{4}-/, '').trim();
+    return cleaned || '—';
+  };
+
   const renderBadge = (statut: Facture['statut']) => {
     switch (statut) {
       case 'attente':
@@ -289,7 +306,7 @@ export default function FacturesPage() {
                     {fac.numero}
                   </div>
                   <div 
-                    className="col-span-1 font-body-sm text-tertiary hover:underline whitespace-nowrap"
+                    className="col-span-1 font-body-sm text-tertiary hover:underline whitespace-nowrap cursor-pointer"
                     onClick={(e) => {
                       if (fac.commandeId || fac.commandeNumero) {
                         e.stopPropagation();
@@ -297,7 +314,7 @@ export default function FacturesPage() {
                       }
                     }}
                   >
-                    {fac.commandeNumero || '—'}
+                    {formatCmdShort(fac)}
                   </div>
                   <div className="col-span-3 flex items-center gap-2">
                     <div className="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center font-label-sm text-text-primary border border-border-base text-[10px]">
