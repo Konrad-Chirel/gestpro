@@ -33,7 +33,19 @@ export default function FacturesPage() {
 
   // Filtered invoices
   const filteredFactures = useMemo(() => {
-    return (factures || []).filter((f) => {
+    const list = factures || [];
+    // Deduplicate by numero to prevent any duplicate rows
+    const seen = new Set<string>();
+    const uniqueList: Facture[] = [];
+    for (const f of list) {
+      const key = f.numero || f.id;
+      if (!seen.has(key)) {
+        seen.add(key);
+        uniqueList.push(f);
+      }
+    }
+
+    return uniqueList.filter((f) => {
       const q = searchQuery.toLowerCase().trim();
       const matchesSearch =
         !q ||

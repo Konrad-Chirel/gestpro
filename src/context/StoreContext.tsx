@@ -1203,6 +1203,15 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const seedDemoDataForUser = useCallback(async (targetUserId: string) => {
     try {
+      // 0. Clean up any existing records for this user to avoid duplicates
+      await Promise.all([
+        supabase.from('paiements').delete().eq('user_id', targetUserId),
+        supabase.from('factures').delete().eq('user_id', targetUserId),
+        supabase.from('commandes').delete().eq('user_id', targetUserId),
+        supabase.from('clients').delete().eq('user_id', targetUserId),
+        supabase.from('produits').delete().eq('user_id', targetUserId),
+      ]);
+
       // 1. Prepare clientIdMap and clientRows
       const clientIdMap: Record<string, string> = {};
       const clientRows = INITIAL_CLIENTS.map((c) => {
@@ -1446,24 +1455,116 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         setNotifications(INITIAL_NOTIFICATIONS);
       }
 
-      setClients((clientsRes.data || []).map(mapDbClient));
-      const loadedCommandes = (commandesRes.data || []).map(mapDbCommande);
+      // Deduplicate factures by numero
+      const rawFactures = facturesRes.data || [];
+      const seenFactureNums = new Set<string>();
+      const uniqueFacturesData: any[] = [];
+      const dupFactureIds: string[] = [];
+      for (const row of rawFactures) {
+        if (!seenFactureNums.has(row.numero)) {
+          seenFactureNums.add(row.numero);
+          uniqueFacturesData.push(row);
+        } else {
+          dupFactureIds.push(row.id);
+        }
+      }
+      if (dupFactureIds.length > 0) {
+        supabase.from('factures').delete().in('id', dupFactureIds).then(() => {});
+      }
+
+      // Deduplicate clients
+      const rawClients = clientsRes.data || [];
+      const seenClientKeys = new Set<string>();
+      const uniqueClientsData: any[] = [];
+      const dupClientIds: string[] = [];
+      for (const row of rawClients) {
+        const key = `${row.nom}_${row.entreprise || ''}`;
+        if (!seenClientKeys.has(key)) {
+          seenClientKeys.add(key);
+          uniqueClientsData.push(row);
+        } else {
+          dupClientIds.push(row.id);
+        }
+      }
+      if (dupClientIds.length > 0) {
+        supabase.from('clients').delete().in('id', dupClientIds).then(() => {});
+      }
+
+      // Deduplicate commandes
+      const rawCommandes = commandesRes.data || [];
+      const seenCmdNums = new Set<string>();
+      const uniqueCommandesData: any[] = [];
+      const dupCmdIds: string[] = [];
+      for (const row of rawCommandes) {
+        if (!seenCmdNums.has(row.numero)) {
+          seenCmdNums.add(row.numero);
+          uniqueCommandesData.push(row);
+        } else {
+          dupCmdIds.push(row.id);
+        }
+      }
+      if (dupCmdIds.length > 0) {
+        supabase.from('commandes').delete().in('id', dupCmdIds).then(() => {});
+      }
+
+      // Deduplicate paiements
+      const rawPaiements = paiementsRes.data || [];
+      const seenPayKeys = new Set<string>();
+      const uniquePaiementsData: any[] = [];
+      const dupPayIds: string[] = [];
+      for (const row of rawPaiements) {
+        const key = row.reference;
+        if (!seenPayKeys.has(key)) {
+          seenPayKeys.add(key);
+          uniquePaiementsData.push(row);
+        } else {
+          dupPayIds.push(row.id);
+        }
+      }
+      if (dupPayIds.length > 0) {
+        supabase.from('paiements').delete().in('id', dupPayIds).then(() => {});
+      }
+
+      // Deduplicate produits
+      const rawProduits = produitsRes.data || [];
+      const seenProdKeys = new Set<string>();
+      const uniqueProduitsData: any[] = [];
+      const dupProdIds: string[] = [];
+      for (const row of rawProduits) {
+        const key = row.nom;
+        if (!seenProdKeys.has(key)) {
+          seenProdKeys.add(key);
+          uniqueProduitsData.push(row);
+        } else {
+          dupProdIds.push(row.id);
+        }
+      }
+      if (dupProdIds.length > 0) {
+        supabase.from('produits').delete().in('id', dupProdIds).then(() => {});
+      }
+
+      setClients(uniqueClientsData.map(mapDbClient));
+      const loadedCommandes = uniqueCommandesData.map(mapDbCommande);
       setCommandes(loadedCommandes);
 
-      // Enrich factures with commandeNumero by resolving from loaded commandes
-      const loadedFactures = (facturesRes.data || []).map(mapDbFacture).map((fac: Facture) => {
-        if (fac.commandeId && !fac.commandeNumero) {
+      // Enrich factures with commandeNumero by resolving from loaded commandes or fallback mapping
+      const loadedFactures = uniqueFacturesData.map(mapDbFacture).map((fac: Facture) => {
+        let cmdNum = fac.commandeNumero;
+        if (!cmdNum && fac.commandeId) {
           const linkedCmd = loadedCommandes.find((cmd: any) => cmd.id === fac.commandeId);
           if (linkedCmd) {
-            return { ...fac, commandeNumero: linkedCmd.numero };
+            cmdNum = linkedCmd.numero;
           }
         }
-        return fac;
+        if (!cmdNum && FACTURE_COMMANDE_MAPPING[fac.numero]) {
+          cmdNum = FACTURE_COMMANDE_MAPPING[fac.numero];
+        }
+        return { ...fac, commandeNumero: cmdNum };
       });
       setFactures(loadedFactures);
 
-      setPaiements((paiementsRes.data || []).map(mapDbPaiement));
-      setProduits((produitsRes.data || []).map(mapDbProduit));
+      setPaiements(uniquePaiementsData.map(mapDbPaiement));
+      setProduits(uniqueProduitsData.map(mapDbProduit));
     } catch (e) {
       console.warn('Could not load user data from Supabase', e);
     } finally {
