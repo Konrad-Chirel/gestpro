@@ -120,6 +120,9 @@ export default function RegisterPage() {
         provider: 'google',
         options: {
           redirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`,
+          queryParams: {
+            prompt: 'select_account',
+          },
         },
       });
       if (error) {
