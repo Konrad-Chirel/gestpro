@@ -1003,6 +1003,10 @@ const LOCAL_STORAGE_KEY_SETTINGS = 'gestpro_company_settings_v1';
 const LOCAL_STORAGE_KEY_THEME = 'gestpro_theme';
 const LOCAL_STORAGE_KEY_NOTIFICATIONS = 'gestpro_notifications_v1';
 
+// Flag for development/demo phase: automatically seeds demo data for any newly created user account
+// Set to false when ready for real production multi-tenant with empty initial data
+export const AUTO_SEED_ALL_NEW_USERS = true;
+
 function applyThemeToDOM(mode: ThemeMode) {
   if (typeof document !== 'undefined') {
     const root = document.documentElement;
@@ -1390,8 +1394,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         currentUser.user_metadata?.name?.toLowerCase().includes('chirel')
       );
 
-      // Auto-seed for Konrad Chirel account if tables are currently empty
-      if (isKonrad && (!clientsRes.data || clientsRes.data.length === 0)) {
+      const shouldAutoSeed = AUTO_SEED_ALL_NEW_USERS || isKonrad;
+
+      // Auto-seed demo dataset if user tables are currently empty (development phase)
+      if (shouldAutoSeed && (!clientsRes.data || clientsRes.data.length === 0)) {
         await seedDemoDataForUser(currentUser.id);
         const [reClients, reCommandes, reFactures, rePaiements, reProduits] = await Promise.all([
           supabase.from('clients').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
@@ -1406,10 +1412,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         paiementsRes = rePaiements;
         produitsRes = reProduits;
         setNotifications(INITIAL_NOTIFICATIONS);
-      } else if (isKonrad) {
-        setNotifications(INITIAL_NOTIFICATIONS);
       } else {
-        setNotifications([]);
+        setNotifications(INITIAL_NOTIFICATIONS);
       }
 
       setClients((clientsRes.data || []).map(mapDbClient));
