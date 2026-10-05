@@ -35,6 +35,8 @@ export default function FactureDetailPage() {
   const [paymentRef, setPaymentRef] = useState('');
   const [paymentNotes, setPaymentNotes] = useState('');
   const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [emailRecipient, setEmailRecipient] = useState('');
 
   // Auto-print if ?print=true
   useEffect(() => {
@@ -154,8 +156,18 @@ export default function FactureDetailPage() {
     setPaymentNotes('');
   };
 
-  const handleSendEmail = async () => {
-    const targetEmail = facture.clientEmail || 'client@gestpro.app';
+  const handleOpenEmailModal = () => {
+    setEmailRecipient(facture.clientEmail || '');
+    setIsEmailModalOpen(true);
+  };
+
+  const handleSendEmail = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const targetEmail = emailRecipient.trim() || facture.clientEmail || 'client@gestpro.app';
+    if (!targetEmail) {
+      showToast('Veuillez renseigner une adresse email', 'error');
+      return;
+    }
     setIsSendingEmail(true);
     try {
       const res = await fetch('/api/send-email', {
@@ -171,13 +183,16 @@ export default function FactureDetailPage() {
       const data = await res.json();
       if (data.simulated) {
         showToast(`[Mode démo] Email prêt pour ${targetEmail}. Configurez RESEND_API_KEY pour l'envoi réel.`, 'info');
+        setIsEmailModalOpen(false);
       } else if (data.success) {
         showToast(`Facture ${facture.numero} envoyée avec succès par email à ${targetEmail} !`, 'success');
+        setIsEmailModalOpen(false);
       } else {
         showToast(`Erreur d'envoi : ${data.error || 'Veuillez vérifier vos identifiants Resend.'}`, 'error');
       }
     } catch {
       showToast(`Facture ${facture.numero} transmise par email à ${targetEmail}`, 'success');
+      setIsEmailModalOpen(false);
     } finally {
       setIsSendingEmail(false);
     }
@@ -248,7 +263,7 @@ export default function FactureDetailPage() {
           </button>
           <button 
             type="button"
-            onClick={handleSendEmail}
+            onClick={handleOpenEmailModal}
             disabled={isSendingEmail}
             className="flex-1 xl:flex-none h-10 px-4 sm:px-5 flex items-center justify-center gap-2 font-label-md text-text-primary border border-border-base rounded-full hover:bg-surface-container-high transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50"
           >
@@ -908,6 +923,80 @@ export default function FactureDetailPage() {
                   className="px-5 py-2 text-xs font-semibold text-on-primary bg-primary hover:bg-primary-hover rounded-full shadow-md transition-colors cursor-pointer"
                 >
                   {t('Valider le règlement')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Envoi Email */}
+      {isEmailModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-surface border border-border-base rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-border-base">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[20px]">mail</span>
+                </div>
+                <div>
+                  <h3 className="font-bold text-base text-text-primary m-0">Envoyer la facture par email</h3>
+                  <p className="text-xs text-text-secondary m-0">{facture.numero} • {facture.clientNom}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsEmailModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-surface-container hover:bg-surface-container-high text-text-secondary hover:text-text-primary flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+
+            <form onSubmit={handleSendEmail} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-text-primary mb-1.5">
+                  Adresse email du destinataire
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={emailRecipient}
+                  onChange={(e) => setEmailRecipient(e.target.value)}
+                  placeholder="ex: client@entreprise.com"
+                  className="w-full bg-input-bg border border-border-base rounded-xl px-4 py-2.5 text-text-primary font-medium focus:border-primary focus:outline-none text-sm"
+                  autoFocus
+                />
+              </div>
+
+              <div className="p-3 rounded-xl bg-primary/5 border border-primary/20 text-xs text-text-secondary space-y-1">
+                <div className="flex items-center gap-1.5 font-semibold text-primary">
+                  <span className="material-symbols-outlined text-[16px]">info</span>
+                  <span>Mode d'essai Resend</span>
+                </div>
+                <p className="text-[11px] leading-relaxed m-0 text-on-surface-variant">
+                  En mode test gratuit (expéditeur <code>onboarding@resend.dev</code>), Resend autorise l'envoi uniquement vers <strong>l'email de votre compte Resend</strong> ou <code>delivered@resend.dev</code>.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-border-base">
+                <button
+                  type="button"
+                  onClick={() => setIsEmailModalOpen(false)}
+                  disabled={isSendingEmail}
+                  className="px-4 py-2 text-xs font-semibold text-text-secondary hover:text-text-primary rounded-full hover:bg-surface-container transition-colors cursor-pointer"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSendingEmail || !emailRecipient}
+                  className="px-5 py-2.5 bg-primary hover:bg-primary-hover text-on-primary rounded-full font-semibold text-xs flex items-center gap-2 shadow-md shadow-primary/20 disabled:opacity-50 cursor-pointer"
+                >
+                  <span className={`material-symbols-outlined text-[16px] ${isSendingEmail ? 'animate-spin' : ''}`}>
+                    {isSendingEmail ? 'progress_activity' : 'send'}
+                  </span>
+                  <span>{isSendingEmail ? 'Envoi en cours...' : 'Envoyer la facture'}</span>
                 </button>
               </div>
             </form>
