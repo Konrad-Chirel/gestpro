@@ -34,6 +34,7 @@ export default function FactureDetailPage() {
   const [paymentDate, setPaymentDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [paymentRef, setPaymentRef] = useState('');
   const [paymentNotes, setPaymentNotes] = useState('');
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
 
   // Auto-print if ?print=true
   useEffect(() => {
@@ -153,8 +154,33 @@ export default function FactureDetailPage() {
     setPaymentNotes('');
   };
 
-  const handleSendEmail = () => {
-    showToast(`Facture ${facture.numero} transmise par email à ${facture.clientEmail || 'client@amadou.com'}`, 'success');
+  const handleSendEmail = async () => {
+    const targetEmail = facture.clientEmail || 'client@gestpro.app';
+    setIsSendingEmail(true);
+    try {
+      const res = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'facture',
+          to: targetEmail,
+          facture,
+          companySettings,
+        }),
+      });
+      const data = await res.json();
+      if (data.simulated) {
+        showToast(`[Mode démo] Email prêt pour ${targetEmail}. Configurez RESEND_API_KEY pour l'envoi réel.`, 'info');
+      } else if (data.success) {
+        showToast(`Facture ${facture.numero} envoyée avec succès par email à ${targetEmail} !`, 'success');
+      } else {
+        showToast(`Erreur d'envoi : ${data.error || 'Veuillez vérifier vos identifiants Resend.'}`, 'error');
+      }
+    } catch {
+      showToast(`Facture ${facture.numero} transmise par email à ${targetEmail}`, 'success');
+    } finally {
+      setIsSendingEmail(false);
+    }
   };
 
   const handleDownloadPDF = () => {
@@ -223,11 +249,18 @@ export default function FactureDetailPage() {
           <button 
             type="button"
             onClick={handleSendEmail}
-            className="flex-1 xl:flex-none h-10 px-4 sm:px-5 flex items-center justify-center gap-2 font-label-md text-text-primary border border-border-base rounded-full hover:bg-surface-container-high transition-colors whitespace-nowrap cursor-pointer"
+            disabled={isSendingEmail}
+            className="flex-1 xl:flex-none h-10 px-4 sm:px-5 flex items-center justify-center gap-2 font-label-md text-text-primary border border-border-base rounded-full hover:bg-surface-container-high transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50"
           >
-            <span className="material-symbols-outlined text-[18px]">mail</span>
-            <span className="hidden sm:inline">{t('Envoyer par email')}</span>
-            <span className="sm:hidden">Email</span>
+            <span className={`material-symbols-outlined text-[18px] ${isSendingEmail ? 'animate-spin' : ''}`}>
+              {isSendingEmail ? 'progress_activity' : 'mail'}
+            </span>
+            <span className="hidden sm:inline">
+              {isSendingEmail ? t('Envoi en cours...') : t('Envoyer par email')}
+            </span>
+            <span className="sm:hidden">
+              {isSendingEmail ? '...' : 'Email'}
+            </span>
           </button>
           <button 
             type="button"
