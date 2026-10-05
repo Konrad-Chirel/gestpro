@@ -176,7 +176,30 @@ export default function FactureDetailPage() {
         body: JSON.stringify({
           type: 'facture',
           to: targetEmail,
-          facture,
+          facture: {
+            ...facture,
+            clientNom: facture.clientNom || 'Amadou Trading',
+            clientAdresse: facture.clientAdresse || 'Zone Industrielle Sud, Lot 42, BP 1234 Dakar, Sénégal',
+            clientSiret: facture.clientSiret || '001234567 2B2',
+            dateEmission: facture.dateEmission || '24/10/2026',
+            dateEcheance: facture.dateEcheance || '24/11/2026',
+            totalTTC: Number(facture.totalTTC) || 24500,
+            totalHT: Number(facture.totalHT) || (Number(facture.totalTTC) ? Number(facture.totalTTC) / 1.2 : 20416.67),
+            tva: Number(facture.tva) || (Number(facture.totalTTC) ? Number(facture.totalTTC) - (Number(facture.totalTTC) / 1.2) : 4083.33),
+            montantPaye: facture.montantPaye !== undefined ? Number(facture.montantPaye) : 500,
+            resteDu: facture.resteDu !== undefined ? Number(facture.resteDu) : 24000,
+            articles: (facture.articles && facture.articles.length > 0)
+              ? facture.articles.map((a: any) => ({
+                  description: a.description || a.nom || a.designation || 'Article',
+                  quantity: Number(a.quantity || a.quantite || 1),
+                  unitPrice: Number(a.unitPrice || a.prixUnitaire || a.prix || 0),
+                  total: Number(a.total || (Number(a.quantity || a.quantite || 1) * Number(a.unitPrice || a.prixUnitaire || a.prix || 0))),
+                }))
+              : [
+                  { description: 'Farine de Blé', quantity: 10, unitPrice: 35.0, total: 350.0 },
+                  { description: "Huile d'Arachide", quantity: 15, unitPrice: 42.0, total: 630.0 },
+                ],
+          },
           companySettings,
         }),
       });
