@@ -15,6 +15,14 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse;
   }
 
+  // Only attempt auth refresh if Supabase cookies actually exist in the request
+  const allCookies = request.cookies.getAll();
+  const hasAuthCookie = allCookies.some((c) => c.name.startsWith('sb-'));
+
+  if (!hasAuthCookie) {
+    return supabaseResponse;
+  }
+
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
       getAll() {
@@ -34,8 +42,17 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  // refreshing the auth token
-  await supabase.auth.getUser();
+  // Refreshing the auth token with a strict 2s timeout so middleware NEVER hangs and causes a 504
+  try {
+    await Promise.race([
+      supabase.auth.getUser(),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Supabase auth refresh timeout')), 2000)
+      ),
+    ]);
+  } catch {
+    // If Supabase is slow or paused, proceed gracefully without crashing the site
+  }
 
   return supabaseResponse;
 }

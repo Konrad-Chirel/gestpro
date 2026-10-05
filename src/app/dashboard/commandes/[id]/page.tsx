@@ -96,7 +96,7 @@ export default function CommandeDetailPage() {
         );
       case 'preparation':
         return (
-          <span className="px-3 py-1 rounded-full bg-tertiary-container/15 text-tertiary-container text-xs font-semibold flex items-center gap-1 border border-tertiary-container/20">
+          <span className="px-3 py-1 rounded-full bg-sky-500/15 text-sky-600 dark:text-sky-400 text-xs font-semibold flex items-center gap-1 border border-sky-500/25">
             <span className="material-symbols-outlined text-[15px]">package_2</span>
             {t('En préparation')}
           </span>
@@ -128,7 +128,7 @@ export default function CommandeDetailPage() {
   const STATUS_OPTIONS: { key: Commande['statut']; label: string; icon: string; color: string }[] = [
     { key: 'attente', label: t('En attente'), icon: 'schedule', color: 'text-warning' },
     { key: 'confirmee', label: t('Confirmée'), icon: 'thumb_up', color: 'text-primary' },
-    { key: 'preparation', label: t('En préparation'), icon: 'package_2', color: 'text-tertiary-container' },
+    { key: 'preparation', label: t('En préparation'), icon: 'package_2', color: 'text-sky-600 dark:text-sky-400' },
     { key: 'livree', label: t('Livrée'), icon: 'check_circle', color: 'text-success' },
     { key: 'annulee', label: t('Annulée'), icon: 'cancel', color: 'text-error' },
   ];

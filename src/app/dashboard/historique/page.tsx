@@ -1175,10 +1175,10 @@ export default function HistoriquePage() {
             {/* Weekly Activity Summary */}
             <div className="bg-surface rounded-xl border border-border-base p-6 shadow-sm">
               <div className="flex items-center justify-between gap-2 mb-6">
-                <h3 className="font-label-sm text-xs font-semibold text-text-secondary uppercase tracking-wider m-0 truncate">
+                <h3 className="font-label-sm text-[11px] sm:text-xs font-semibold text-text-secondary uppercase tracking-wider m-0">
                   {t('ACTIVITÉ DE LA SEMAINE')}
                 </h3>
-                <span className="inline-flex items-center justify-center text-[11px] font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary whitespace-nowrap shrink-0 border border-primary/20">
+                <span className="inline-flex items-center justify-center text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary whitespace-nowrap shrink-0 border border-primary/20">
                   {t('7 jours')}
                 </span>
               </div>
