@@ -157,7 +157,11 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Erreur Resend:', error);
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      let userFriendlyMsg = error.message;
+      if (error.message?.includes('only send testing emails to your own email address')) {
+        userFriendlyMsg = "En mode test gratuit Resend, vous pouvez envoyer des tests uniquement vers l'adresse email de votre compte Resend. Pour envoyer à tous vos clients, validez votre domaine sur resend.com/domains.";
+      }
+      return NextResponse.json({ error: userFriendlyMsg }, { status: 400 });
     }
 
     return NextResponse.json({ success: true, data });
