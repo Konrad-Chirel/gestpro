@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useStore } from '@/context/StoreContext';
 
 export default function LandingPage() {
-  const { theme, toggleTheme } = useStore();
+  const { theme, toggleTheme, user } = useStore();
 
   return (
     <div className="bg-background font-body-md text-on-surface min-h-screen transition-colors duration-200">
@@ -44,7 +44,7 @@ export default function LandingPage() {
 
             {/* Dashboard Access Button */}
             <Link 
-              href="/dashboard" 
+              href={user ? "/dashboard" : "/login"} 
               className="bg-primary hover:bg-primary-hover text-on-primary font-semibold text-xs sm:text-sm h-9 sm:h-11 px-3 sm:px-5 rounded-xl transition-all duration-200 shadow-md shadow-primary/20 flex items-center justify-center gap-1.5 shrink-0 whitespace-nowrap active:scale-95" 
               data-path="dashboard-overview"
             >
@@ -55,9 +55,9 @@ export default function LandingPage() {
 
             {/* User Profile Avatar */}
             <Link
-              href="/login"
+              href={user ? "/dashboard" : "/login"}
               className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface border border-border-base flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors shrink-0 shadow-sm"
-              title="Connexion"
+              title={user ? "Mon Dashboard" : "Connexion"}
             >
               <span className="material-symbols-outlined text-[18px] sm:text-[20px]">person</span>
             </Link>
@@ -107,13 +107,13 @@ export default function LandingPage() {
               {/* Buttons */}
               <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 mb-10 sm:mb-20 w-full sm:w-auto animate-[fade-in-up_1s_ease-out_0.6s_both] px-4">
                 <Link 
-                  href="/login" 
+                  href={user ? "/dashboard" : "/login"} 
                   className="h-10 sm:h-12 px-6 sm:px-8 flex items-center justify-center rounded-xl bg-primary hover:bg-primary-hover text-on-primary text-xs sm:text-label-md font-semibold transition-all duration-300 w-full sm:w-auto shadow-[0_0_20px_rgba(234,88,12,0.3)] hover:shadow-[0_0_30px_rgba(234,88,12,0.5)]"
                 >
                   Commencer maintenant
                 </Link>
                 <Link 
-                  href="/login" 
+                  href={user ? "/dashboard" : "/login"} 
                   className="h-10 sm:h-12 px-6 sm:px-8 flex items-center justify-center rounded-xl border border-border-base hover:bg-surface-container-high text-text-primary text-xs sm:text-label-md font-semibold transition-all duration-300 w-full sm:w-auto"
                 >
                   Voir la démo
@@ -226,7 +226,7 @@ export default function LandingPage() {
 
                 <div className="relative z-10 flex-shrink-0 w-full sm:w-auto">
                   <Link 
-                    href="/login" 
+                    href={user ? "/dashboard" : "/login"} 
                     className="h-10 sm:h-12 px-6 sm:px-8 flex items-center justify-center rounded-xl bg-primary hover:bg-primary-hover text-on-primary text-xs sm:text-label-md font-semibold transition-all duration-300 whitespace-nowrap shadow-lg shadow-primary/20 w-full sm:w-auto"
                   >
                     Commencer maintenant !

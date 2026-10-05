@@ -1182,7 +1182,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
     return {
       id: '',
-      full_name: '',
+      full_name: 'Konrad Chirel',
       company_name: 'GestPro S.A.S',
       email: '',
     };
@@ -1192,12 +1192,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [userProfile, setUserProfile] = useState<UserProfile>(getInitialUserProfile);
   const [isHydrated, setIsHydrated] = useState(false);
   const [theme, setThemeState] = useState<ThemeMode>('dark');
-  const [clients, setClients] = useState<Client[]>([]);
-  const [commandes, setCommandes] = useState<Commande[]>([]);
-  const [factures, setFactures] = useState<Facture[]>([]);
-  const [paiements, setPaiements] = useState<Paiement[]>([]);
-  const [produits, setProduits] = useState<Produit[]>([]);
-  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [clients, setClients] = useState<Client[]>(INITIAL_CLIENTS);
+  const [commandes, setCommandes] = useState<Commande[]>(INITIAL_COMMANDES);
+  const [factures, setFactures] = useState<Facture[]>(INITIAL_FACTURES);
+  const [paiements, setPaiements] = useState<Paiement[]>(INITIAL_PAIEMENTS);
+  const [produits, setProduits] = useState<Produit[]>(INITIAL_PRODUITS);
+  const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
   const [companySettings, setCompanySettings] = useState<CompanySettings>(DEFAULT_COMPANY_SETTINGS);
   const [toast, setToast] = useState<ToastMessage | null>(null);
 
@@ -1369,7 +1369,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       const storedName = typeof window !== 'undefined' ? localStorage.getItem('gestpro_user_name') : '';
       const storedCompany = typeof window !== 'undefined' ? localStorage.getItem('gestpro_company_name') : '';
 
-      const fullName = profile?.full_name || currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || storedName || '';
+      const fullName = profile?.full_name || currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || storedName || 'Konrad Chirel';
       const companyName = profile?.company_name || currentUser.user_metadata?.company_name || storedCompany || 'GestPro S.A.S';
 
       setUserProfile({
@@ -1543,30 +1543,43 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         supabase.from('produits').delete().in('id', dupProdIds).then(() => {});
       }
 
-      setClients(uniqueClientsData.map(mapDbClient));
-      const loadedCommandes = uniqueCommandesData.map(mapDbCommande);
-      setCommandes(loadedCommandes);
+      if (uniqueClientsData.length === 0) {
+        setClients(INITIAL_CLIENTS);
+        setCommandes(INITIAL_COMMANDES);
+        setFactures(INITIAL_FACTURES);
+        setPaiements(INITIAL_PAIEMENTS);
+        setProduits(INITIAL_PRODUITS);
+      } else {
+        setClients(uniqueClientsData.map(mapDbClient));
+        const loadedCommandes = uniqueCommandesData.map(mapDbCommande);
+        setCommandes(loadedCommandes);
 
-      // Enrich factures with commandeNumero by resolving from loaded commandes or fallback mapping
-      const loadedFactures = uniqueFacturesData.map(mapDbFacture).map((fac: Facture) => {
-        let cmdNum = fac.commandeNumero;
-        if (!cmdNum && fac.commandeId) {
-          const linkedCmd = loadedCommandes.find((cmd: any) => cmd.id === fac.commandeId);
-          if (linkedCmd) {
-            cmdNum = linkedCmd.numero;
+        // Enrich factures with commandeNumero by resolving from loaded commandes or fallback mapping
+        const loadedFactures = uniqueFacturesData.map(mapDbFacture).map((fac: Facture) => {
+          let cmdNum = fac.commandeNumero;
+          if (!cmdNum && fac.commandeId) {
+            const linkedCmd = loadedCommandes.find((cmd: any) => cmd.id === fac.commandeId);
+            if (linkedCmd) {
+              cmdNum = linkedCmd.numero;
+            }
           }
-        }
-        if (!cmdNum && FACTURE_COMMANDE_MAPPING[fac.numero]) {
-          cmdNum = FACTURE_COMMANDE_MAPPING[fac.numero];
-        }
-        return { ...fac, commandeNumero: cmdNum };
-      });
-      setFactures(loadedFactures);
+          if (!cmdNum && FACTURE_COMMANDE_MAPPING[fac.numero]) {
+            cmdNum = FACTURE_COMMANDE_MAPPING[fac.numero];
+          }
+          return { ...fac, commandeNumero: cmdNum };
+        });
+        setFactures(loadedFactures);
 
-      setPaiements(uniquePaiementsData.map(mapDbPaiement));
-      setProduits(uniqueProduitsData.map(mapDbProduit));
+        setPaiements(uniquePaiementsData.map(mapDbPaiement));
+        setProduits(uniqueProduitsData.map(mapDbProduit));
+      }
     } catch (e) {
       console.warn('Could not load user data from Supabase', e);
+      setClients(INITIAL_CLIENTS);
+      setCommandes(INITIAL_COMMANDES);
+      setFactures(INITIAL_FACTURES);
+      setPaiements(INITIAL_PAIEMENTS);
+      setProduits(INITIAL_PRODUITS);
     } finally {
       setIsHydrated(true);
     }
@@ -1581,12 +1594,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         await loadUserData(currentUser);
       } else {
         setUser(null);
-        setUserProfile({ id: '', full_name: '', company_name: '', email: '' });
-        setClients([]);
-        setCommandes([]);
-        setFactures([]);
-        setPaiements([]);
-        setProduits([]);
+        setUserProfile({ id: '', full_name: 'Konrad Chirel', company_name: 'GestPro S.A.S', email: '' });
+        setClients(INITIAL_CLIENTS);
+        setCommandes(INITIAL_COMMANDES);
+        setFactures(INITIAL_FACTURES);
+        setPaiements(INITIAL_PAIEMENTS);
+        setProduits(INITIAL_PRODUITS);
         setIsHydrated(true);
       }
     } catch (e) {

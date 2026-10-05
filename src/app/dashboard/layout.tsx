@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import TopHeader from '@/components/TopHeader';
+import { useStore } from '@/context/StoreContext';
 
 export default function DashboardLayout({
   children,
@@ -10,6 +12,24 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { user, isHydrated } = useStore();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isHydrated && !user) {
+      router.replace('/login');
+    }
+  }, [isHydrated, user, router]);
+
+  // If hydrated and no user, show a smooth loading indicator while redirecting
+  if (isHydrated && !user) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-3">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <span className="text-xs text-text-secondary font-medium">Redirection vers la connexion...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background font-body-md text-on-surface overflow-x-hidden w-full">

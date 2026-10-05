@@ -36,7 +36,7 @@ interface ActivityItem {
 export default function HistoriquePage() {
   const { formatCurrency, t, companySettings, commandes, factures, paiements, clients, user, userProfile } = useStore();
 
-  const currentUserName = userProfile?.full_name || user?.user_metadata?.full_name || 'Utilisateur';
+  const currentUserName = userProfile?.full_name || user?.user_metadata?.full_name || 'Konrad Chirel';
   const currentUserInitials = currentUserName
     .split(' ')
     .filter(Boolean)
