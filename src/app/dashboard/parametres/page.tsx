@@ -4,13 +4,14 @@ import { useState, useEffect } from 'react';
 import { useStore } from '@/context/StoreContext';
 
 export default function ParametresPage() {
-  const { companySettings, updateCompanySettings, seedDemoData, t } = useStore();
+  const { companySettings, updateCompanySettings, userProfile, updateUserProfile, seedDemoData, t } = useStore();
 
   const [activeTab, setActiveTab] = useState<'general' | 'preferences' | 'facturation' | 'securite'>('general');
   const [isSaving, setIsSaving] = useState(false);
   const [isSeeding, setIsSeeding] = useState(false);
 
   // Form fields
+  const [fullName, setFullName] = useState(userProfile?.full_name || 'Konrad Chirel');
   const [companyName, setCompanyName] = useState(companySettings?.companyName || 'GestPro S.A.S');
   const [siret, setSiret] = useState(companySettings?.siret || '123 456 789 00012');
   const [tva, setTva] = useState(companySettings?.tva || 'FR 12 345678901');
@@ -28,6 +29,9 @@ export default function ParametresPage() {
 
   // Sync state when store hydrates
   useEffect(() => {
+    if (userProfile?.full_name) {
+      setFullName(userProfile.full_name);
+    }
     if (companySettings) {
       if (companySettings.companyName) setCompanyName(companySettings.companyName);
       if (companySettings.siret) setSiret(companySettings.siret);
@@ -42,7 +46,7 @@ export default function ParametresPage() {
       if (companySettings.defaultTva) setDefaultTva(String(companySettings.defaultTva));
       if (companySettings.paymentTermsDays) setPaymentTermsDays(String(companySettings.paymentTermsDays));
     }
-  }, [companySettings]);
+  }, [companySettings, userProfile]);
 
   // Profile completion calculation
   const fields = [companyName, siret, tva, address, zip, city];
@@ -52,6 +56,10 @@ export default function ParametresPage() {
   const handleSave = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setIsSaving(true);
+    updateUserProfile({
+      full_name: fullName.trim(),
+      company_name: companyName.trim(),
+    });
     updateCompanySettings({
       companyName: companyName.trim(),
       siret: siret.trim(),
@@ -117,6 +125,9 @@ export default function ParametresPage() {
               <h3 className="text-lg sm:text-headline-md font-bold sm:font-headline-md text-text-primary truncate max-w-full px-2">
                 {companyName || 'GestPro S.A.S'}
               </h3>
+              <p className="text-xs sm:text-body-sm text-text-secondary truncate max-w-full px-2 mt-0.5 font-medium">
+                {fullName || 'Konrad Chirel'}
+              </p>
               <div className="flex items-center gap-2 mt-2">
                 <div className={`w-2 h-2 rounded-full ${profilePercentage >= 80 ? 'bg-success animate-pulse' : 'bg-warning animate-pulse'}`}></div>
                 <span className={`font-label-sm ${profilePercentage >= 80 ? 'text-success' : 'text-warning'}`}>
@@ -188,6 +199,21 @@ export default function ParametresPage() {
                 <span>{t("Informations de l'entreprise")}</span>
               </h2>
               <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex flex-col gap-2 md:col-span-2">
+                  <label className="font-label-md text-text-secondary" htmlFor="fullName">{t("Nom complet de l'administrateur / gérant")}</label>
+                  <div className="relative group">
+                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary group-focus-within:text-primary transition-colors">person</span>
+                    <input
+                      className="w-full h-12 bg-input-bg rounded-xl pl-12 pr-4 text-body-md text-text-primary outline-none focus:ring-1 focus:ring-primary border border-border-base transition-all"
+                      id="fullName"
+                      type="text"
+                      placeholder="Ex: Konrad Chirel"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                    />
+                  </div>
+                </div>
+
                 <div className="flex flex-col gap-2 md:col-span-2">
                   <label className="font-label-md text-text-secondary" htmlFor="companyName">{t("Nom de l'entreprise")}</label>
                   <div className="relative group">

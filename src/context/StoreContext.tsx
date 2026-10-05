@@ -162,6 +162,7 @@ interface StoreContextType {
   userProfile: UserProfile | null;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  updateUserProfile: (updates: Partial<UserProfile>) => Promise<void>;
   // Theme
   theme: ThemeMode;
   toggleTheme: () => void;
@@ -2423,6 +2424,44 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     showToast('Informations de l’entreprise enregistrées avec succès !', 'success');
   };
 
+  const updateUserProfile = async (updates: Partial<UserProfile>) => {
+    setUserProfile((prev) => {
+      const next = { ...prev, ...updates };
+      if (typeof window !== 'undefined') {
+        if (next.full_name) localStorage.setItem('gestpro_user_name', next.full_name);
+        if (next.company_name) localStorage.setItem('gestpro_company_name', next.company_name);
+        if (next.email) localStorage.setItem('gestpro_user_email', next.email);
+      }
+      return next;
+    });
+
+    if (user && supabase) {
+      try {
+        const payload: any = {};
+        if (updates.full_name !== undefined) payload.full_name = updates.full_name;
+        if (updates.company_name !== undefined) payload.company_name = updates.company_name;
+        if (updates.avatar_url !== undefined) payload.avatar_url = updates.avatar_url;
+
+        await supabase.from('profiles').upsert({
+          id: user.id,
+          email: user.email,
+          ...payload,
+          updated_at: new Date().toISOString(),
+        });
+
+        await supabase.auth.updateUser({
+          data: {
+            full_name: updates.full_name,
+            name: updates.full_name,
+            company_name: updates.company_name,
+          },
+        });
+      } catch (err) {
+        console.warn('Could not sync profile to Supabase', err);
+      }
+    }
+  };
+
   const resetToDefaultData = () => {
     setClients([]);
     setCommandes([]);
@@ -2524,6 +2563,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         userProfile,
         logout,
         refreshProfile,
+        updateUserProfile,
         theme,
         toggleTheme,
         setTheme,

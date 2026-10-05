@@ -815,6 +815,7 @@ export const PHRASE_TO_ENGLISH: Record<string, string> = {
   "Total Volume (TTC)": "Total Volume (incl. tax)",
   "Transactions": "Transactions",
   "Volume Total": "Total Volume",
+  "Nom complet de l'administrateur / gérant": "Administrator / Manager Full Name",
 };
 
 export function getTranslation(keyOrText: string, lang: Language = 'fr'): string {
