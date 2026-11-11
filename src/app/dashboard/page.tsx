@@ -81,14 +81,15 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col w-full gap-8 p-5 sm:p-7 md:p-8 lg:p-10 max-w-7xl mx-auto">
-      {/* ── 1. HEADER SECTION ── */}
+      {/* ── 1. HEADER SECTION (MATCH ONLINE) ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-text-primary flex items-center gap-2">
-            {greeting} <span className="inline-block origin-bottom -mt-1 text-2xl sm:text-3xl">👋</span>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-text-primary flex items-center gap-2.5">
+            <span>{greeting}</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 inline-block"></span>
           </h1>
           <p className="text-sm sm:text-base text-text-secondary">
-            {t('dashboard.subtitle') || 'Voici un aperçu de votre activité aujourd’hui.'}
+            {t('dashboard.subtitle') || "Voici un aperçu de votre activité aujourd'hui."}
           </p>
         </div>
 
@@ -96,119 +97,92 @@ export default function Dashboard() {
         <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
           <Link
             href="/dashboard/commandes/nouveau"
-            className="inline-flex items-center gap-2 h-11 px-4 sm:px-5 rounded-xl border border-border-base bg-surface hover:bg-surface-container text-text-primary text-sm font-semibold transition-colors cursor-pointer"
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-xl border border-border-base bg-surface hover:bg-surface-container text-text-primary text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[20px] text-text-secondary">add</span>
+            <span className="material-symbols-outlined text-[18px]">add</span>
             <span>Nouvelle commande</span>
           </Link>
 
           <Link
             href="/dashboard/factures/nouveau"
-            className="inline-flex items-center gap-2 h-11 px-4 sm:px-5 rounded-xl bg-primary hover:bg-primary-hover text-on-primary text-sm font-bold transition-all shadow-sm shadow-primary/20 cursor-pointer"
+            className="inline-flex items-center gap-2 h-10 px-4 sm:px-5 rounded-xl bg-primary hover:bg-primary-hover text-on-primary text-xs sm:text-sm font-bold transition-all shadow-sm shadow-primary/20 cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[20px]">receipt_long</span>
+            <span className="material-symbols-outlined text-[18px]">receipt_long</span>
             <span>Émettre une facture</span>
           </Link>
         </div>
       </div>
 
-      {/* ── 2. KPI CARDS (HAUTEUR & IMPACT VISUEL) ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+      {/* ── 2. KPI CARDS (MATCH EXACT ONLINE DESIGN) ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {/* KPI 1: Chiffre d'affaires */}
-        <div className="bg-surface rounded-2xl p-6 border border-border-base shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-5 relative overflow-hidden group">
+        <div className="bg-surface rounded-2xl p-5 sm:p-6 border border-border-base shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-4 relative overflow-hidden group">
           <div className="flex justify-between items-start">
-            <div className="flex flex-col gap-1.5">
-              <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">
-                {t('dashboard.revenue')}
-              </span>
-              <span className="text-2xl sm:text-3xl lg:text-[32px] font-extrabold text-text-primary tracking-tight tabular-nums">
-                {formatCurrency(stats.caTotal, { showDecimals: false })}
-              </span>
-            </div>
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 shrink-0">
-              <span className="material-symbols-outlined text-[24px]">trending_up</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 pt-2 border-t border-border-base/50">
-            <span className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-xs font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
-              <span className="material-symbols-outlined text-[14px]">arrow_upward</span>
-              12.5%
+            <span className="text-xs sm:text-sm font-medium text-text-secondary">
+              {t('dashboard.revenue')}
             </span>
-            <span className="text-xs text-text-secondary font-medium">
-              {t('dashboard.vs_last_month')}
+            <span className="material-symbols-outlined text-emerald-500 text-[22px]">trending_up</span>
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight tabular-nums">
+              {formatCurrency(stats.caTotal, { showDecimals: false })}
+            </span>
+            <span className="text-xs text-emerald-500 font-medium pt-1">
+              +12.5% {t('dashboard.vs_last_month')}
             </span>
           </div>
         </div>
 
         {/* KPI 2: Commandes */}
-        <div className="bg-surface rounded-2xl p-6 border border-border-base shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-5 relative overflow-hidden group">
+        <div className="bg-surface rounded-2xl p-5 sm:p-6 border border-border-base shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-4 relative overflow-hidden group">
           <div className="flex justify-between items-start">
-            <div className="flex flex-col gap-1.5">
-              <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">
-                {t('dashboard.orders')}
-              </span>
-              <span className="text-2xl sm:text-3xl lg:text-[32px] font-extrabold text-text-primary tracking-tight tabular-nums">
-                {stats.commandesCount}
-              </span>
-            </div>
-            <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
-              <span className="material-symbols-outlined text-[24px]">shopping_cart</span>
-            </div>
+            <span className="text-xs sm:text-sm font-medium text-text-secondary">
+              {t('dashboard.orders')}
+            </span>
+            <span className="material-symbols-outlined text-orange-400 text-[22px]">shopping_cart</span>
           </div>
-          <div className="flex items-center gap-2 pt-2 border-t border-border-base/50">
-            <span className="text-xs font-semibold text-text-primary">
+          <div className="flex flex-col gap-1">
+            <span className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight tabular-nums">
               {stats.commandesCount}
             </span>
-            <span className="text-xs text-text-secondary font-medium">
-              {t('dashboard.in_total')}
+            <span className="text-xs text-text-secondary pt-1">
+              Dossiers enregistrés dans l'ERP
             </span>
           </div>
         </div>
 
         {/* KPI 3: Factures impayées */}
-        <div className="bg-surface rounded-2xl p-6 border border-border-base shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-5 relative overflow-hidden group">
+        <div className="bg-surface rounded-2xl p-5 sm:p-6 border border-border-base shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-4 relative overflow-hidden group">
           <div className="flex justify-between items-start">
-            <div className="flex flex-col gap-1.5">
-              <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">
-                {t('dashboard.unpaid')}
-              </span>
-              <span className="text-2xl sm:text-3xl lg:text-[32px] font-extrabold text-text-primary tracking-tight tabular-nums">
-                {stats.facturesImpayeesCount}
-              </span>
-            </div>
-            <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shrink-0">
-              <span className="material-symbols-outlined text-[24px]">schedule</span>
-            </div>
+            <span className="text-xs sm:text-sm font-medium text-text-secondary">
+              {t('dashboard.unpaid')}
+            </span>
+            <span className="material-symbols-outlined text-amber-500 text-[22px]">schedule</span>
           </div>
-          <div className="flex items-center gap-1.5 pt-2 border-t border-border-base/50 text-xs truncate">
-            <span className="text-text-secondary font-medium">Solde restant dû :</span>
-            <span className="font-bold text-amber-600 dark:text-amber-400 tabular-nums">
-              {formatCurrency(stats.totalResteDu, { showDecimals: false })}
+          <div className="flex flex-col gap-1">
+            <span className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight tabular-nums">
+              {stats.facturesImpayeesCount}
+            </span>
+            <span className="text-xs text-text-secondary pt-1 truncate">
+              Solde restant dû : <strong className="font-bold text-text-primary">{formatCurrency(stats.totalResteDu, { showDecimals: false })}</strong>
             </span>
           </div>
         </div>
 
         {/* KPI 4: Clients actifs */}
-        <div className="bg-surface rounded-2xl p-6 border border-border-base shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-5 relative overflow-hidden group">
+        <div className="bg-surface rounded-2xl p-5 sm:p-6 border border-border-base shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-4 relative overflow-hidden group">
           <div className="flex justify-between items-start">
-            <div className="flex flex-col gap-1.5">
-              <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">
-                {t('dashboard.active_clients')}
-              </span>
-              <span className="text-2xl sm:text-3xl lg:text-[32px] font-extrabold text-text-primary tracking-tight tabular-nums">
-                {stats.clientsActifsCount}
-              </span>
-            </div>
-            <div className="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-500 shrink-0">
-              <span className="material-symbols-outlined text-[24px]">group</span>
-            </div>
+            <span className="text-xs sm:text-sm font-medium text-text-secondary">
+              {t('dashboard.active_clients')}
+            </span>
+            <span className="material-symbols-outlined text-sky-400 text-[22px]">group</span>
           </div>
-          <div className="flex items-center gap-2 pt-2 border-t border-border-base/50">
-            <span className="text-xs font-semibold text-text-primary">
+          <div className="flex flex-col gap-1">
+            <span className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight tabular-nums">
               {stats.clientsActifsCount}
             </span>
-            <span className="text-xs text-text-secondary font-medium">
-              {t('dashboard.registered')}
+            <span className="text-xs text-text-secondary pt-1">
+              Comptes clients actifs
             </span>
           </div>
         </div>
@@ -418,52 +392,59 @@ export default function Dashboard() {
                 <Link
                   key={cmd.id}
                   href={`/dashboard/commandes/${cmd.id}`}
-                  className="flex items-center justify-between py-3.5 px-2 hover:bg-surface-container/60 rounded-xl transition-colors group cursor-pointer gap-3 sm:gap-4"
+                  className="flex items-center justify-between py-3 px-2 sm:px-3 hover:bg-surface-container/60 rounded-xl transition-colors group cursor-pointer gap-3 sm:gap-4"
                 >
                   {/* Médaillon circulaire + détails */}
-                  <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                    <div className="w-11 h-11 rounded-full bg-surface-container-high border border-border-base/60 flex items-center justify-center text-text-secondary group-hover:bg-primary/15 group-hover:text-primary transition-colors shrink-0">
-                      <span className="material-symbols-outlined text-[22px]">shopping_bag</span>
+                  <div className="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
+                    <div className="w-10 h-10 rounded-full bg-surface-container-high border border-border-base/60 flex items-center justify-center text-text-secondary group-hover:bg-primary/15 group-hover:text-primary transition-colors shrink-0">
+                      <span className="material-symbols-outlined text-[20px]">shopping_bag</span>
                     </div>
                     <div className="flex flex-col min-w-0">
-                      <span className="text-[15px] font-bold text-text-primary group-hover:text-primary transition-colors truncate">
-                        {cmd.numero}
-                      </span>
-                      <span className="text-xs sm:text-sm text-text-secondary truncate mt-0.5">
-                        {cmd.clientNom}
+                      <div className="flex items-center gap-2 truncate">
+                        <span className="text-sm font-bold text-text-primary group-hover:text-primary transition-colors shrink-0">
+                          {cmd.numero}
+                        </span>
+                        {cmd.clientNom && (
+                          <span className="text-xs sm:text-sm text-text-secondary truncate">
+                            {cmd.clientNom}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-xs text-text-secondary mt-0.5">
+                        {cmd.dateCreation}
                       </span>
                     </div>
                   </div>
 
                   {/* Montant + Statut */}
-                  <div className="flex items-center gap-3 sm:gap-5 shrink-0">
-                    <span className="text-sm sm:text-base font-bold text-text-primary whitespace-nowrap text-right tabular-nums min-w-[90px] sm:min-w-[110px]">
+                  <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+                    <span className="text-sm sm:text-base font-bold text-text-primary whitespace-nowrap text-right tabular-nums min-w-[75px] sm:min-w-[95px]">
                       {formatCurrency(cmd.totalTTC || 0)}
                     </span>
 
-                    <div className="w-28 sm:w-32 flex justify-end shrink-0">
+                    <div className="w-24 sm:w-28 flex justify-end shrink-0">
                       {cmd.statut === 'livree' && (
-                        <span className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 text-xs font-semibold px-3 py-1 rounded-full text-center whitespace-nowrap">
+                        <span className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 text-xs font-semibold px-2.5 sm:px-3 py-1 rounded-full text-center whitespace-nowrap">
                           {t('status.delivered')}
                         </span>
                       )}
                       {cmd.statut === 'confirmee' && (
-                        <span className="bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/25 text-xs font-semibold px-3 py-1 rounded-full text-center whitespace-nowrap">
+                        <span className="bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/25 text-xs font-semibold px-2.5 sm:px-3 py-1 rounded-full text-center whitespace-nowrap">
                           {t('status.confirmed')}
                         </span>
                       )}
                       {cmd.statut === 'preparation' && (
-                        <span className="bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/25 text-xs font-semibold px-3 py-1 rounded-full text-center whitespace-nowrap">
+                        <span className="bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/25 text-xs font-semibold px-2.5 sm:px-3 py-1 rounded-full text-center whitespace-nowrap">
                           {t('status.preparing')}
                         </span>
                       )}
                       {cmd.statut === 'attente' && (
-                        <span className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25 text-xs font-semibold px-3 py-1 rounded-full text-center whitespace-nowrap">
+                        <span className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25 text-xs font-semibold px-2.5 sm:px-3 py-1 rounded-full text-center whitespace-nowrap">
                           {t('status.pending')}
                         </span>
                       )}
                       {cmd.statut === 'annulee' && (
-                        <span className="bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/25 text-xs font-semibold px-3 py-1 rounded-full text-center whitespace-nowrap">
+                        <span className="bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/25 text-xs font-semibold px-2.5 sm:px-3 py-1 rounded-full text-center whitespace-nowrap">
                           {t('status.cancelled')}
                         </span>
                       )}
@@ -517,47 +498,54 @@ export default function Dashboard() {
                 <Link
                   key={fac.id}
                   href={`/dashboard/factures/${fac.id}`}
-                  className="flex items-center justify-between py-3.5 px-2 hover:bg-surface-container/60 rounded-xl transition-colors group cursor-pointer gap-3 sm:gap-4"
+                  className="flex items-center justify-between py-3 px-2 sm:px-3 hover:bg-surface-container/60 rounded-xl transition-colors group cursor-pointer gap-3 sm:gap-4"
                 >
                   {/* Médaillon circulaire + détails */}
-                  <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                    <div className="w-11 h-11 rounded-full bg-surface-container-high border border-border-base/60 flex items-center justify-center text-text-secondary group-hover:bg-primary/15 group-hover:text-primary transition-colors shrink-0">
-                      <span className="material-symbols-outlined text-[22px]">receipt_long</span>
+                  <div className="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
+                    <div className="w-10 h-10 rounded-full bg-surface-container-high border border-border-base/60 flex items-center justify-center text-text-secondary group-hover:bg-primary/15 group-hover:text-primary transition-colors shrink-0">
+                      <span className="material-symbols-outlined text-[20px]">receipt_long</span>
                     </div>
                     <div className="flex flex-col min-w-0">
-                      <span className="text-[15px] font-bold text-text-primary group-hover:text-primary transition-colors truncate">
-                        {fac.numero}
-                      </span>
-                      <span className="text-xs sm:text-sm text-text-secondary truncate mt-0.5">
-                        {fac.clientNom || fac.dateEmission}
+                      <div className="flex items-center gap-2 truncate">
+                        <span className="text-sm font-bold text-text-primary group-hover:text-primary transition-colors shrink-0">
+                          {fac.numero}
+                        </span>
+                        {fac.clientNom && (
+                          <span className="text-xs sm:text-sm text-text-secondary truncate">
+                            {fac.clientNom}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-xs text-text-secondary mt-0.5">
+                        Échéance : {fac.dateEcheance || fac.dateEmission}
                       </span>
                     </div>
                   </div>
 
                   {/* Montant + Statut */}
-                  <div className="flex items-center gap-3 sm:gap-5 shrink-0">
-                    <span className="text-sm sm:text-base font-bold text-text-primary whitespace-nowrap text-right tabular-nums min-w-[90px] sm:min-w-[110px]">
+                  <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+                    <span className="text-sm sm:text-base font-bold text-text-primary whitespace-nowrap text-right tabular-nums min-w-[75px] sm:min-w-[95px]">
                       {formatCurrency(fac.totalTTC || 0)}
                     </span>
 
-                    <div className="w-28 sm:w-32 flex justify-end shrink-0">
+                    <div className="w-24 sm:w-28 flex justify-end shrink-0">
                       {fac.statut === 'payee' && (
-                        <span className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 text-xs font-semibold px-3 py-1 rounded-full text-center whitespace-nowrap">
+                        <span className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 text-xs font-semibold px-2.5 sm:px-3 py-1 rounded-full text-center whitespace-nowrap">
                           {t('status.paid')}
                         </span>
                       )}
                       {fac.statut === 'attente' && (
-                        <span className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25 text-xs font-semibold px-3 py-1 rounded-full text-center whitespace-nowrap">
+                        <span className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25 text-xs font-semibold px-2.5 sm:px-3 py-1 rounded-full text-center whitespace-nowrap">
                           {t('status.pending')}
                         </span>
                       )}
                       {fac.statut === 'retard' && (
-                        <span className="bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/25 text-xs font-semibold px-3 py-1 rounded-full text-center whitespace-nowrap">
+                        <span className="bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/25 text-xs font-semibold px-2.5 sm:px-3 py-1 rounded-full text-center whitespace-nowrap">
                           {t('status.overdue')}
                         </span>
                       )}
                       {fac.statut === 'annulee' && (
-                        <span className="bg-surface-container-highest text-text-secondary border border-border-base text-xs font-semibold px-3 py-1 rounded-full text-center whitespace-nowrap">
+                        <span className="bg-surface-container-highest text-text-secondary border border-border-base text-xs font-semibold px-2.5 sm:px-3 py-1 rounded-full text-center whitespace-nowrap">
                           {t('status.cancelled')}
                         </span>
                       )}
