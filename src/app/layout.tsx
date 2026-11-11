@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import { StoreProvider } from "@/context/StoreContext";
 
@@ -15,24 +16,24 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning>
       <head>
-        <script
+        <Script
+          id="theme-initializer"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `
-              (function() {
-                try {
-                  var t = localStorage.getItem('gestpro_theme');
-                  var d = document.documentElement;
-                  if (t === 'light') {
-                    d.classList.remove('dark');
-                    d.classList.add('light');
-                    d.setAttribute('data-theme', 'light');
-                  } else {
-                    d.classList.remove('light');
-                    d.classList.add('dark');
-                    d.setAttribute('data-theme', 'dark');
-                  }
-                } catch(e) {}
-              })();
+              try {
+                var t = localStorage.getItem('gestpro_theme');
+                var d = document.documentElement;
+                if (t === 'light') {
+                  d.classList.remove('dark');
+                  d.classList.add('light');
+                  d.setAttribute('data-theme', 'light');
+                } else {
+                  d.classList.remove('light');
+                  d.classList.add('dark');
+                  d.setAttribute('data-theme', 'dark');
+                }
+              } catch(e) {}
             `,
           }}
         />
