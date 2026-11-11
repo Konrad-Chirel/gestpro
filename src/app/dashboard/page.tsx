@@ -1,14 +1,19 @@
 'use client';
 
+import React, { useMemo } from 'react';
 import Link from 'next/link';
-import { useMemo } from 'react';
 import { useStore } from '@/context/StoreContext';
 
 export default function Dashboard() {
   const { clients, commandes, factures, formatCurrency, t, user, userProfile } = useStore();
 
   const storedName = typeof window !== 'undefined' ? localStorage.getItem('gestpro_user_name') : null;
-  const displayName = userProfile?.full_name || user?.user_metadata?.full_name || user?.user_metadata?.name || storedName || 'Konrad Chirel';
+  const displayName =
+    userProfile?.full_name ||
+    user?.user_metadata?.full_name ||
+    user?.user_metadata?.name ||
+    storedName ||
+    'Konrad Chirel';
   const firstName = displayName ? displayName.trim().split(' ')[0] : '';
   const greeting = firstName ? `${t('dashboard.welcome')}, ${firstName}` : t('dashboard.welcome');
 
@@ -49,9 +54,9 @@ export default function Dashboard() {
     const attenteOffset = -retardDash;
     const payeOffset = -(retardDash + attenteDash);
 
-    // 3 dernières commandes et 3 dernières factures
-    const recentOrders = [...commandes].slice(0, 3);
-    const recentInvoices = [...factures].slice(0, 3);
+    // 4 dernières commandes et 4 dernières factures
+    const recentOrders = [...commandes].slice(0, 4);
+    const recentInvoices = [...factures].slice(0, 4);
 
     return {
       caTotal,
@@ -75,340 +80,491 @@ export default function Dashboard() {
   }, [clients, commandes, factures]);
 
   return (
-    <div className="flex flex-col w-full gap-8 p-6 md:p-8 lg:p-10">
-      {/* Header Section */}
-      <div className="flex flex-col gap-2 relative">
-        <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-text-primary flex items-center flex-wrap gap-2">
-          {greeting} <span className="inline-block hover:animate-bounce origin-bottom -mt-2">👋</span>
-        </h1>
-        <p className="text-body-lg font-body-lg text-text-secondary mt-2">{t('dashboard.subtitle')}</p>
+    <div className="flex flex-col w-full gap-8 p-5 sm:p-7 md:p-8 lg:p-10 max-w-7xl mx-auto">
+      {/* ── 1. HEADER SECTION ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-text-primary flex items-center gap-2">
+            {greeting} <span className="inline-block origin-bottom -mt-1 text-2xl sm:text-3xl">👋</span>
+          </h1>
+          <p className="text-sm sm:text-base text-text-secondary">
+            {t('dashboard.subtitle') || 'Voici un aperçu de votre activité aujourd’hui.'}
+          </p>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+          <Link
+            href="/dashboard/commandes/nouveau"
+            className="inline-flex items-center gap-2 h-11 px-4 sm:px-5 rounded-xl border border-border-base bg-surface hover:bg-surface-container text-text-primary text-sm font-semibold transition-colors cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[20px] text-text-secondary">add</span>
+            <span>Nouvelle commande</span>
+          </Link>
+
+          <Link
+            href="/dashboard/factures/nouveau"
+            className="inline-flex items-center gap-2 h-11 px-4 sm:px-5 rounded-xl bg-primary hover:bg-primary-hover text-on-primary text-sm font-bold transition-all shadow-sm shadow-primary/20 cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[20px]">receipt_long</span>
+            <span>Émettre une facture</span>
+          </Link>
+        </div>
       </div>
-      
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* KPI 1 */}
-        <div className="bg-surface rounded-xl p-6 shadow-lg hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group overflow-hidden relative">
-          <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/5 rounded-full group-hover:scale-150 transition-transform duration-700 ease-out"></div>
-          <div className="flex justify-between items-start mb-4">
-            <div className="flex flex-col gap-1">
-              <span className="text-label-md font-label-md text-text-secondary uppercase tracking-wider">{t('dashboard.revenue')}</span>
-              <span className="text-headline-lg font-headline-lg text-text-primary">
+
+      {/* ── 2. KPI CARDS (HAUTEUR & IMPACT VISUEL) ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+        {/* KPI 1: Chiffre d'affaires */}
+        <div className="bg-surface rounded-2xl p-6 border border-border-base shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-5 relative overflow-hidden group">
+          <div className="flex justify-between items-start">
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">
+                {t('dashboard.revenue')}
+              </span>
+              <span className="text-2xl sm:text-3xl lg:text-[32px] font-extrabold text-text-primary tracking-tight tabular-nums">
                 {formatCurrency(stats.caTotal, { showDecimals: false })}
               </span>
             </div>
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors">
-              <span className="material-symbols-outlined text-[28px]">trending_up</span>
+            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 shrink-0">
+              <span className="material-symbols-outlined text-[24px]">trending_up</span>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="bg-success/15 text-success text-label-sm font-label-sm px-2 py-1 rounded flex items-center gap-1">
-              <span className="material-symbols-outlined text-[14px]">arrow_upward</span> 12.5%
+          <div className="flex items-center gap-2 pt-2 border-t border-border-base/50">
+            <span className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-xs font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+              <span className="material-symbols-outlined text-[14px]">arrow_upward</span>
+              12.5%
             </span>
-            <span className="text-label-sm font-label-sm text-text-secondary">{t('dashboard.vs_last_month')}</span>
+            <span className="text-xs text-text-secondary font-medium">
+              {t('dashboard.vs_last_month')}
+            </span>
           </div>
         </div>
-        
-        {/* KPI 2 */}
-        <div className="bg-surface rounded-xl p-6 shadow-lg hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group overflow-hidden relative">
-          <div className="absolute -right-4 -top-4 w-24 h-24 bg-tertiary/5 rounded-full group-hover:scale-150 transition-transform duration-700 ease-out"></div>
-          <div className="flex justify-between items-start mb-4">
-            <div className="flex flex-col gap-1">
-              <span className="text-label-md font-label-md text-text-secondary uppercase tracking-wider">{t('dashboard.orders')}</span>
-              <span className="text-headline-lg font-headline-lg text-text-primary">{stats.commandesCount}</span>
+
+        {/* KPI 2: Commandes */}
+        <div className="bg-surface rounded-2xl p-6 border border-border-base shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-5 relative overflow-hidden group">
+          <div className="flex justify-between items-start">
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">
+                {t('dashboard.orders')}
+              </span>
+              <span className="text-2xl sm:text-3xl lg:text-[32px] font-extrabold text-text-primary tracking-tight tabular-nums">
+                {stats.commandesCount}
+              </span>
             </div>
-            <div className="w-12 h-12 rounded-full bg-tertiary/10 flex items-center justify-center text-tertiary group-hover:bg-tertiary group-hover:text-on-tertiary transition-colors">
-              <span className="material-symbols-outlined text-[28px]">shopping_cart</span>
+            <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+              <span className="material-symbols-outlined text-[24px]">shopping_cart</span>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="bg-success/15 text-success text-label-sm font-label-sm px-2 py-1 rounded flex items-center gap-1">
-              <span className="material-symbols-outlined text-[14px]">add</span> {stats.commandesCount}
+          <div className="flex items-center gap-2 pt-2 border-t border-border-base/50">
+            <span className="text-xs font-semibold text-text-primary">
+              {stats.commandesCount}
             </span>
-            <span className="text-label-sm font-label-sm text-text-secondary">{t('dashboard.in_total')}</span>
+            <span className="text-xs text-text-secondary font-medium">
+              {t('dashboard.in_total')}
+            </span>
           </div>
         </div>
-        
-        {/* KPI 3 */}
-        <div className="bg-surface rounded-xl p-6 shadow-lg hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group overflow-hidden relative">
-          <div className="absolute -right-4 -top-4 w-24 h-24 bg-warning/5 rounded-full group-hover:scale-150 transition-transform duration-700 ease-out"></div>
-          <div className="flex justify-between items-start mb-4">
-            <div className="flex flex-col gap-1">
-              <span className="text-label-md font-label-md text-text-secondary uppercase tracking-wider">{t('dashboard.unpaid')}</span>
-              <span className="text-headline-lg font-headline-lg text-text-primary">{stats.facturesImpayeesCount}</span>
+
+        {/* KPI 3: Factures impayées */}
+        <div className="bg-surface rounded-2xl p-6 border border-border-base shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-5 relative overflow-hidden group">
+          <div className="flex justify-between items-start">
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">
+                {t('dashboard.unpaid')}
+              </span>
+              <span className="text-2xl sm:text-3xl lg:text-[32px] font-extrabold text-text-primary tracking-tight tabular-nums">
+                {stats.facturesImpayeesCount}
+              </span>
             </div>
-            <div className="w-12 h-12 rounded-full bg-warning/10 flex items-center justify-center text-warning group-hover:bg-warning group-hover:text-on-background transition-colors">
-              <span className="material-symbols-outlined text-[28px]">description</span>
+            <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shrink-0">
+              <span className="material-symbols-outlined text-[24px]">schedule</span>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-warning text-label-md font-label-md">
+          <div className="flex items-center gap-1.5 pt-2 border-t border-border-base/50 text-xs truncate">
+            <span className="text-text-secondary font-medium">Solde restant dû :</span>
+            <span className="font-bold text-amber-600 dark:text-amber-400 tabular-nums">
               {formatCurrency(stats.totalResteDu, { showDecimals: false })}
             </span>
-            <span className="text-label-sm font-label-sm text-text-secondary">{t('dashboard.pending')}</span>
           </div>
         </div>
-        
-        {/* KPI 4 */}
-        <div className="bg-surface rounded-xl p-6 shadow-lg hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group overflow-hidden relative">
-          <div className="absolute -right-4 -top-4 w-24 h-24 bg-secondary/5 rounded-full group-hover:scale-150 transition-transform duration-700 ease-out"></div>
-          <div className="flex justify-between items-start mb-4">
-            <div className="flex flex-col gap-1">
-              <span className="text-label-md font-label-md text-text-secondary uppercase tracking-wider">{t('dashboard.active_clients')}</span>
-              <span className="text-headline-lg font-headline-lg text-text-primary">{stats.clientsActifsCount}</span>
+
+        {/* KPI 4: Clients actifs */}
+        <div className="bg-surface rounded-2xl p-6 border border-border-base shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-5 relative overflow-hidden group">
+          <div className="flex justify-between items-start">
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">
+                {t('dashboard.active_clients')}
+              </span>
+              <span className="text-2xl sm:text-3xl lg:text-[32px] font-extrabold text-text-primary tracking-tight tabular-nums">
+                {stats.clientsActifsCount}
+              </span>
             </div>
-            <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center text-secondary group-hover:bg-secondary group-hover:text-on-secondary transition-colors">
-              <span className="material-symbols-outlined text-[28px]">group</span>
+            <div className="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-500 shrink-0">
+              <span className="material-symbols-outlined text-[24px]">group</span>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="bg-success/15 text-success text-label-sm font-label-sm px-2 py-1 rounded flex items-center gap-1">
-              <span className="material-symbols-outlined text-[14px]">arrow_upward</span> {stats.clientsActifsCount}
+          <div className="flex items-center gap-2 pt-2 border-t border-border-base/50">
+            <span className="text-xs font-semibold text-text-primary">
+              {stats.clientsActifsCount}
             </span>
-            <span className="text-label-sm font-label-sm text-text-secondary">{t('dashboard.registered')}</span>
+            <span className="text-xs text-text-secondary font-medium">
+              {t('dashboard.registered')}
+            </span>
           </div>
         </div>
       </div>
-      
-      {/* Charts Section */}
+
+      {/* ── 3. CHARTS SECTION ── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Bar Chart */}
-        <div className="lg:col-span-8 bg-surface rounded-xl p-4 sm:p-6 shadow-lg flex flex-col gap-4 sm:gap-6">
+        <div className="lg:col-span-8 bg-surface rounded-2xl p-6 sm:p-7 border border-border-base shadow-sm flex flex-col justify-between gap-6">
           <div className="flex items-center justify-between gap-2">
-            <h2 className="text-base sm:text-headline-md font-bold sm:font-headline-md text-text-primary">{t('dashboard.revenue_6_months')}</h2>
-            <button className="w-9 h-9 sm:w-10 sm:h-10 rounded-full hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant transition-colors shrink-0">
-              <span className="material-symbols-outlined text-[20px] sm:text-[24px]">more_vert</span>
-            </button>
-          </div>
-          <div className="flex-1 w-full relative min-h-[256px] h-64 shrink-0 flex items-end justify-between gap-2 md:gap-4 pt-8 mt-4 overflow-x-auto pb-2 hide-scrollbar">
-            {/* Grid Lines */}
-            <div className="absolute inset-0 flex flex-col justify-between pb-8 pointer-events-none min-w-[300px]">
-              <div className="w-full h-px bg-surface-container-high"></div>
-              <div className="w-full h-px bg-surface-container-high"></div>
-              <div className="w-full h-px bg-surface-container-high"></div>
-              <div className="w-full h-px bg-surface-container-high"></div>
+            <div>
+              <h2 className="text-lg sm:text-xl font-extrabold text-text-primary tracking-tight">
+                {t('dashboard.revenue_6_months')}
+              </h2>
+              <p className="text-xs sm:text-sm text-text-secondary mt-1">
+                Évolution semestrielle des encaissements certifiés
+              </p>
             </div>
+            <span className="text-xs font-semibold px-3 py-1 rounded-full bg-surface-container border border-border-base text-text-secondary">
+              6 derniers mois
+            </span>
+          </div>
+
+          <div className="relative min-h-[240px] h-60 w-full flex items-end justify-between pt-8 pb-4">
+            {/* Horizontal Gridlines */}
+            <div className="absolute inset-0 flex flex-col justify-between pb-8 pointer-events-none">
+              <div className="w-full h-px bg-border-base/60" />
+              <div className="w-full h-px bg-border-base/60" />
+              <div className="w-full h-px bg-border-base/60" />
+              <div className="w-full h-px bg-border-base/60" />
+            </div>
+
             {/* Bars */}
-            <div className="relative w-full h-full flex items-end justify-around z-10 pb-8 group/chart min-w-[300px]">
-              {/* Mar */}
-              <div className="w-8 md:w-12 h-[45%] bg-surface-container-high hover:bg-primary transition-colors duration-300 rounded-t-lg relative group/bar cursor-pointer">
-                <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-surface-container-highest text-text-primary text-label-sm font-label-sm px-2 py-1 rounded opacity-0 group-hover/bar:opacity-100 transition-opacity">12k</div>
-                <span className="absolute -bottom-7 left-1/2 -translate-x-1/2 text-label-sm font-label-sm text-text-secondary">{t('month.mar')}</span>
-              </div>
-              {/* Avr */}
-              <div className="w-8 md:w-12 h-[60%] bg-surface-container-high hover:bg-primary transition-colors duration-300 rounded-t-lg relative group/bar cursor-pointer">
-                <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-surface-container-highest text-text-primary text-label-sm font-label-sm px-2 py-1 rounded opacity-0 group-hover/bar:opacity-100 transition-opacity">15k</div>
-                <span className="absolute -bottom-7 left-1/2 -translate-x-1/2 text-label-sm font-label-sm text-text-secondary">{t('month.apr')}</span>
-              </div>
-              {/* Mai */}
-              <div className="w-8 md:w-12 h-[55%] bg-surface-container-high hover:bg-primary transition-colors duration-300 rounded-t-lg relative group/bar cursor-pointer">
-                <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-surface-container-highest text-text-primary text-label-sm font-label-sm px-2 py-1 rounded opacity-0 group-hover/bar:opacity-100 transition-opacity">14.2k</div>
-                <span className="absolute -bottom-7 left-1/2 -translate-x-1/2 text-label-sm font-label-sm text-text-secondary">{t('month.may')}</span>
-              </div>
-              {/* Juin */}
-              <div className="w-8 md:w-12 h-[75%] bg-surface-container-high hover:bg-primary transition-colors duration-300 rounded-t-lg relative group/bar cursor-pointer">
-                <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-surface-container-highest text-text-primary text-label-sm font-label-sm px-2 py-1 rounded opacity-0 group-hover/bar:opacity-100 transition-opacity">18.9k</div>
-                <span className="absolute -bottom-7 left-1/2 -translate-x-1/2 text-label-sm font-label-sm text-text-secondary">{t('month.jun')}</span>
-              </div>
-              {/* Juil */}
-              <div className="w-8 md:w-12 h-[85%] bg-surface-container-high hover:bg-primary transition-colors duration-300 rounded-t-lg relative group/bar cursor-pointer">
-                <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-surface-container-highest text-text-primary text-label-sm font-label-sm px-2 py-1 rounded opacity-0 group-hover/bar:opacity-100 transition-opacity">22.5k</div>
-                <span className="absolute -bottom-7 left-1/2 -translate-x-1/2 text-label-sm font-label-sm text-text-secondary">{t('month.jul')}</span>
-              </div>
-              {/* Août */}
-              <div className="w-8 md:w-12 h-[95%] bg-primary shadow-[0_0_15px_rgba(255,182,144,0.3)] hover:bg-primary-hover transition-colors duration-300 rounded-t-lg relative group/bar cursor-pointer">
-                <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-surface-container-highest text-text-primary text-label-sm font-label-sm px-2 py-1 rounded opacity-0 group-hover/bar:opacity-100 transition-opacity">
-                  {formatCurrency(stats.caTotal, { compact: true })}
+            <div className="relative w-full h-full flex items-end justify-around z-10 pb-6">
+              {[
+                { label: t('month.mar'), height: '45%', value: '12k' },
+                { label: t('month.apr'), height: '60%', value: '15k' },
+                { label: t('month.may'), height: '55%', value: '14.2k' },
+                { label: t('month.jun'), height: '75%', value: '18.9k' },
+                { label: t('month.jul'), height: '85%', value: '22.5k' },
+                {
+                  label: t('month.aug'),
+                  height: '95%',
+                  value: formatCurrency(stats.caTotal, { compact: true }),
+                  current: true,
+                },
+              ].map((bar, idx) => (
+                <div
+                  key={idx}
+                  className="flex flex-col items-center gap-2 group relative cursor-pointer h-full justify-end flex-1"
+                >
+                  <div
+                    style={{ height: bar.height }}
+                    className={`w-8 sm:w-12 rounded-t-lg transition-colors duration-200 relative ${
+                      bar.current
+                        ? 'bg-primary shadow-sm'
+                        : 'bg-surface-container-high hover:bg-primary/60'
+                    }`}
+                  >
+                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-surface border border-border-base shadow-sm text-text-primary text-xs font-semibold px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                      {bar.value}
+                    </div>
+                  </div>
+                  <span
+                    className={`text-xs sm:text-sm font-semibold tabular-nums mt-1 ${
+                      bar.current ? 'text-primary font-bold' : 'text-text-secondary'
+                    }`}
+                  >
+                    {bar.label}
+                  </span>
                 </div>
-                <span className="absolute -bottom-7 left-1/2 -translate-x-1/2 text-label-sm font-label-sm text-primary font-bold">{t('month.aug')}</span>
-              </div>
+              ))}
             </div>
           </div>
         </div>
-        
+
         {/* Donut Chart */}
-        <div className="lg:col-span-4 bg-surface rounded-xl p-4 sm:p-6 shadow-lg flex flex-col gap-4 sm:gap-6">
-          <h2 className="text-base sm:text-headline-md font-bold sm:font-headline-md text-text-primary">{t('dashboard.payment_breakdown')}</h2>
-          <div className="flex-1 flex flex-col items-center justify-center relative">
-            <svg className="w-48 h-48 -rotate-90" viewBox="0 0 100 100">
-              {/* Background circle */}
-              <circle cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" className="text-surface-container-high" strokeWidth="12"></circle>
-              {/* En retard */}
-              <circle className="transition-all duration-1000" cx="50" cy="50" fill="transparent" r="40" stroke="#EF4444" strokeDasharray={`${stats.retardDash} 251.2`} strokeDashoffset={`${stats.retardOffset}`} strokeWidth="12"></circle>
-              {/* En attente */}
-              <circle className="transition-all duration-1000" cx="50" cy="50" fill="transparent" r="40" stroke="#F59E0B" strokeDasharray={`${stats.attenteDash} 251.2`} strokeDashoffset={`${stats.attenteOffset}`} strokeWidth="12"></circle>
-              {/* Payé */}
-              <circle className="transition-all duration-1000" cx="50" cy="50" fill="transparent" r="40" stroke="#22C55E" strokeDasharray={`${stats.payeDash} 251.2`} strokeDashoffset={`${stats.payeOffset}`} strokeWidth="12"></circle>
+        <div className="lg:col-span-4 bg-surface rounded-2xl p-6 sm:p-7 border border-border-base shadow-sm flex flex-col justify-between gap-6">
+          <div>
+            <h2 className="text-lg sm:text-xl font-extrabold text-text-primary tracking-tight">
+              {t('dashboard.payment_breakdown')}
+            </h2>
+            <p className="text-xs sm:text-sm text-text-secondary mt-1">
+              Répartition des statuts de facturation
+            </p>
+          </div>
+
+          <div className="flex flex-col items-center justify-center relative my-auto py-2">
+            <svg className="w-44 h-44 -rotate-90" viewBox="0 0 100 100">
+              <circle
+                cx="50"
+                cy="50"
+                fill="transparent"
+                r="40"
+                stroke="currentColor"
+                className="text-surface-container"
+                strokeWidth="11"
+              />
+              <circle
+                cx="50"
+                cy="50"
+                fill="transparent"
+                r="40"
+                stroke="#EF4444"
+                strokeDasharray={`${stats.retardDash} 251.2`}
+                strokeDashoffset={`${stats.retardOffset}`}
+                strokeWidth="11"
+              />
+              <circle
+                cx="50"
+                cy="50"
+                fill="transparent"
+                r="40"
+                stroke="#F59E0B"
+                strokeDasharray={`${stats.attenteDash} 251.2`}
+                strokeDashoffset={`${stats.attenteOffset}`}
+                strokeWidth="11"
+              />
+              <circle
+                cx="50"
+                cy="50"
+                fill="transparent"
+                r="40"
+                stroke="#10B981"
+                strokeDasharray={`${stats.payeDash} 251.2`}
+                strokeDashoffset={`${stats.payeOffset}`}
+                strokeWidth="11"
+              />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-display-lg font-display-lg text-text-primary">{stats.pctPaye}%</span>
-              <span className="text-label-sm font-label-sm text-text-secondary">{t('dashboard.paid')}</span>
+              <span className="text-3xl sm:text-4xl font-extrabold text-text-primary tabular-nums">
+                {stats.pctPaye}%
+              </span>
+              <span className="text-xs font-semibold text-text-secondary uppercase tracking-wider mt-0.5">
+                {t('dashboard.paid')}
+              </span>
             </div>
           </div>
-          <div className="flex flex-col gap-3 mt-4">
-            <div className="flex items-center justify-between text-body-sm font-body-sm">
+
+          <div className="space-y-2.5 pt-3 border-t border-border-base text-xs sm:text-sm">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-success"></div>
-                <span className="text-text-secondary">{t('status.paid')}</span>
+                <span className="w-3 h-3 rounded-full bg-emerald-500" />
+                <span className="text-text-secondary font-medium">{t('status.paid')}</span>
               </div>
-              <span className="text-text-primary font-bold">{stats.pctPaye}%</span>
+              <span className="font-bold text-text-primary tabular-nums">{stats.pctPaye}%</span>
             </div>
-            <div className="flex items-center justify-between text-body-sm font-body-sm">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-warning"></div>
-                <span className="text-text-secondary">{t('status.pending')}</span>
+                <span className="w-3 h-3 rounded-full bg-amber-500" />
+                <span className="text-text-secondary font-medium">{t('status.pending')}</span>
               </div>
-              <span className="text-text-primary font-bold">{stats.pctAttente}%</span>
+              <span className="font-bold text-text-primary tabular-nums">{stats.pctAttente}%</span>
             </div>
-            <div className="flex items-center justify-between text-body-sm font-body-sm">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-error"></div>
-                <span className="text-text-secondary">{t('status.overdue')}</span>
+                <span className="w-3 h-3 rounded-full bg-red-500" />
+                <span className="text-text-secondary font-medium">{t('status.overdue')}</span>
               </div>
-              <span className="text-text-primary font-bold">{stats.pctRetard}%</span>
+              <span className="font-bold text-text-primary tabular-nums">{stats.pctRetard}%</span>
             </div>
           </div>
         </div>
       </div>
-      
-      {/* Tables Section */}
+
+      {/* ── 4. ACTIVITÉ RÉCENTE (SECTION FLUIDE, ALIGNÉE & MÉDAILLONS PRO) ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Orders */}
-        <div className="bg-surface rounded-xl p-4 sm:p-6 shadow-lg flex flex-col gap-4 sm:gap-6">
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="text-base sm:text-headline-md font-bold sm:font-headline-md text-text-primary">{t('dashboard.recent_orders')}</h2>
-            <Link className="text-primary hover:text-primary-hover text-xs sm:text-label-md font-medium sm:font-label-md flex items-center gap-1 transition-colors shrink-0" href="/dashboard/commandes">
-              {t('dashboard.view_all')} <span className="material-symbols-outlined text-[16px] sm:text-[18px]">arrow_forward</span>
+        {/* Commandes récentes */}
+        <div className="bg-surface rounded-2xl p-6 sm:p-7 border border-border-base shadow-sm flex flex-col gap-4">
+          <div className="flex items-center justify-between gap-2 pb-3 border-b border-border-base">
+            <div>
+              <h2 className="text-lg sm:text-xl font-extrabold text-text-primary tracking-tight">
+                {t('dashboard.recent_orders')}
+              </h2>
+              <p className="text-xs sm:text-sm text-text-secondary mt-0.5">
+                Dernières commandes enregistrées
+              </p>
+            </div>
+            <Link
+              href="/dashboard/commandes"
+              className="text-xs sm:text-sm font-bold text-primary hover:text-primary-hover transition-colors flex items-center gap-1 shrink-0"
+            >
+              <span>{t('dashboard.view_all')}</span>
+              <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
             </Link>
           </div>
-          <div className="flex flex-col gap-2 overflow-x-auto pb-2 hide-scrollbar">
+
+          <div className="flex flex-col divide-y divide-border-base/50">
             {stats.recentOrders.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-8 text-center rounded-xl border border-dashed border-border-base bg-surface-container-lowest/50 my-1">
+              <div className="flex flex-col items-center justify-center p-8 text-center rounded-xl border border-dashed border-border-base bg-surface-container-low/40 my-2">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-3">
                   <span className="material-symbols-outlined text-[24px]">shopping_cart</span>
                 </div>
                 <p className="text-sm font-semibold text-text-primary mb-1">
                   {t('dashboard.no_orders_yet') || 'Aucune commande pour le moment'}
                 </p>
-                <p className="text-xs text-text-secondary mb-4 max-w-xs">
-                  {t('dashboard.create_order_desc') || 'Créez votre première commande pour suivre vos ventes en temps réel.'}
-                </p>
                 <Link
                   href="/dashboard/commandes/nouveau"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-on-primary text-xs font-semibold hover:bg-primary-hover transition-colors shadow-sm"
+                  className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-on-primary text-xs font-bold hover:bg-primary-hover transition-colors"
                 >
                   <span className="material-symbols-outlined text-[16px]">add</span>
                   <span>{t('dashboard.new_order') || 'Créer une commande'}</span>
                 </Link>
               </div>
             ) : (
-              <div className="min-w-[400px] flex flex-col gap-2">
-                {stats.recentOrders.map((cmd) => (
-                  <Link
-                    key={cmd.id}
-                    href={`/dashboard/commandes/${cmd.id}`}
-                    className="flex items-center justify-between p-3.5 sm:p-4 bg-surface-container-lowest rounded-lg hover:bg-surface-container-high transition-colors group cursor-pointer gap-3"
-                  >
-                    <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-                      <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-text-secondary group-hover:bg-primary/20 group-hover:text-primary transition-colors shrink-0">
-                        <span className="material-symbols-outlined text-[20px]">shopping_bag</span>
-                      </div>
-                      <div className="flex flex-col min-w-0">
-                        <span className="text-label-md font-label-md text-text-primary truncate">{cmd.numero}</span>
-                        <span className="text-label-sm font-label-sm text-text-secondary truncate">{cmd.clientNom}</span>
-                      </div>
+              stats.recentOrders.map((cmd) => (
+                <Link
+                  key={cmd.id}
+                  href={`/dashboard/commandes/${cmd.id}`}
+                  className="flex items-center justify-between py-3.5 px-2 hover:bg-surface-container/60 rounded-xl transition-colors group cursor-pointer gap-3 sm:gap-4"
+                >
+                  {/* Médaillon circulaire + détails */}
+                  <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                    <div className="w-11 h-11 rounded-full bg-surface-container-high border border-border-base/60 flex items-center justify-center text-text-secondary group-hover:bg-primary/15 group-hover:text-primary transition-colors shrink-0">
+                      <span className="material-symbols-outlined text-[22px]">shopping_bag</span>
                     </div>
-                    <div className="flex items-center gap-3 sm:gap-5 shrink-0">
-                      <span className="text-sm sm:text-base font-semibold text-text-primary whitespace-nowrap text-right min-w-[100px] sm:min-w-[130px]">
-                        {formatCurrency(cmd.totalTTC || 0)}
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[15px] font-bold text-text-primary group-hover:text-primary transition-colors truncate">
+                        {cmd.numero}
                       </span>
+                      <span className="text-xs sm:text-sm text-text-secondary truncate mt-0.5">
+                        {cmd.clientNom}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Montant + Statut */}
+                  <div className="flex items-center gap-3 sm:gap-5 shrink-0">
+                    <span className="text-sm sm:text-base font-bold text-text-primary whitespace-nowrap text-right tabular-nums min-w-[90px] sm:min-w-[110px]">
+                      {formatCurrency(cmd.totalTTC || 0)}
+                    </span>
+
+                    <div className="w-28 sm:w-32 flex justify-end shrink-0">
                       {cmd.statut === 'livree' && (
-                        <span className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-label-sm font-semibold px-3 py-1 rounded-full w-24 text-center shrink-0">{t('status.delivered')}</span>
+                        <span className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 text-xs font-semibold px-3 py-1 rounded-full text-center whitespace-nowrap">
+                          {t('status.delivered')}
+                        </span>
                       )}
                       {cmd.statut === 'confirmee' && (
-                        <span className="bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 text-label-sm font-semibold px-3 py-1 rounded-full w-24 text-center shrink-0">{t('status.confirmed')}</span>
+                        <span className="bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/25 text-xs font-semibold px-3 py-1 rounded-full text-center whitespace-nowrap">
+                          {t('status.confirmed')}
+                        </span>
                       )}
                       {cmd.statut === 'preparation' && (
-                        <span className="bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/25 text-label-sm font-semibold px-3 py-1 rounded-full w-24 text-center shrink-0">{t('status.preparing')}</span>
+                        <span className="bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/25 text-xs font-semibold px-3 py-1 rounded-full text-center whitespace-nowrap">
+                          {t('status.preparing')}
+                        </span>
                       )}
                       {cmd.statut === 'attente' && (
-                        <span className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25 text-label-sm font-semibold px-3 py-1 rounded-full w-24 text-center shrink-0">{t('status.pending')}</span>
+                        <span className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25 text-xs font-semibold px-3 py-1 rounded-full text-center whitespace-nowrap">
+                          {t('status.pending')}
+                        </span>
                       )}
                       {cmd.statut === 'annulee' && (
-                        <span className="bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-label-sm font-semibold px-3 py-1 rounded-full w-24 text-center shrink-0">{t('status.cancelled')}</span>
+                        <span className="bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/25 text-xs font-semibold px-3 py-1 rounded-full text-center whitespace-nowrap">
+                          {t('status.cancelled')}
+                        </span>
                       )}
                     </div>
-                  </Link>
-                ))}
-              </div>
+                  </div>
+                </Link>
+              ))
             )}
           </div>
         </div>
-        
-        {/* Recent Invoices */}
-        <div className="bg-surface rounded-xl p-4 sm:p-6 shadow-lg flex flex-col gap-4 sm:gap-6">
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="text-base sm:text-headline-md font-bold sm:font-headline-md text-text-primary">{t('dashboard.recent_invoices')}</h2>
-            <Link className="text-primary hover:text-primary-hover text-xs sm:text-label-md font-medium sm:font-label-md flex items-center gap-1 transition-colors shrink-0" href="/dashboard/factures">
-              {t('dashboard.view_all')} <span className="material-symbols-outlined text-[16px] sm:text-[18px]">arrow_forward</span>
+
+        {/* Factures récentes */}
+        <div className="bg-surface rounded-2xl p-6 sm:p-7 border border-border-base shadow-sm flex flex-col gap-4">
+          <div className="flex items-center justify-between gap-2 pb-3 border-b border-border-base">
+            <div>
+              <h2 className="text-lg sm:text-xl font-extrabold text-text-primary tracking-tight">
+                {t('dashboard.recent_invoices')}
+              </h2>
+              <p className="text-xs sm:text-sm text-text-secondary mt-0.5">
+                Dernières factures émises
+              </p>
+            </div>
+            <Link
+              href="/dashboard/factures"
+              className="text-xs sm:text-sm font-bold text-primary hover:text-primary-hover transition-colors flex items-center gap-1 shrink-0"
+            >
+              <span>{t('dashboard.view_all')}</span>
+              <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
             </Link>
           </div>
-          <div className="flex flex-col gap-2 overflow-x-auto pb-2 hide-scrollbar">
+
+          <div className="flex flex-col divide-y divide-border-base/50">
             {stats.recentInvoices.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-8 text-center rounded-xl border border-dashed border-border-base bg-surface-container-lowest/50 my-1">
+              <div className="flex flex-col items-center justify-center p-8 text-center rounded-xl border border-dashed border-border-base bg-surface-container-low/40 my-2">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-3">
                   <span className="material-symbols-outlined text-[24px]">receipt_long</span>
                 </div>
                 <p className="text-sm font-semibold text-text-primary mb-1">
                   {t('dashboard.no_invoices_yet') || 'Aucune facture émise'}
                 </p>
-                <p className="text-xs text-text-secondary mb-4 max-w-xs">
-                  {t('dashboard.create_invoice_desc') || 'Générez votre première facture pour encaisser vos règlements.'}
-                </p>
                 <Link
                   href="/dashboard/factures/nouveau"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-on-primary text-xs font-semibold hover:bg-primary-hover transition-colors shadow-sm"
+                  className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-on-primary text-xs font-bold hover:bg-primary-hover transition-colors"
                 >
                   <span className="material-symbols-outlined text-[16px]">add</span>
                   <span>{t('dashboard.create_invoice') || 'Créer une facture'}</span>
                 </Link>
               </div>
             ) : (
-              <div className="min-w-[400px] flex flex-col gap-2">
-                {stats.recentInvoices.map((fac) => (
-                  <Link
-                    key={fac.id}
-                    href={`/dashboard/factures/${fac.id}`}
-                    className="flex items-center justify-between p-3.5 sm:p-4 bg-surface-container-lowest rounded-lg hover:bg-surface-container-high transition-colors group cursor-pointer gap-3"
-                  >
-                    <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-                      <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-text-secondary group-hover:bg-primary/20 group-hover:text-primary transition-colors shrink-0">
-                        <span className="material-symbols-outlined text-[20px]">receipt_long</span>
-                      </div>
-                      <div className="flex flex-col min-w-0">
-                        <span className="text-label-md font-label-md text-text-primary truncate">{fac.numero}</span>
-                        <span className="text-label-sm font-label-sm text-text-secondary truncate">{fac.clientNom || fac.dateEmission}</span>
-                      </div>
+              stats.recentInvoices.map((fac) => (
+                <Link
+                  key={fac.id}
+                  href={`/dashboard/factures/${fac.id}`}
+                  className="flex items-center justify-between py-3.5 px-2 hover:bg-surface-container/60 rounded-xl transition-colors group cursor-pointer gap-3 sm:gap-4"
+                >
+                  {/* Médaillon circulaire + détails */}
+                  <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                    <div className="w-11 h-11 rounded-full bg-surface-container-high border border-border-base/60 flex items-center justify-center text-text-secondary group-hover:bg-primary/15 group-hover:text-primary transition-colors shrink-0">
+                      <span className="material-symbols-outlined text-[22px]">receipt_long</span>
                     </div>
-                    <div className="flex items-center gap-3 sm:gap-5 shrink-0">
-                      <span className="text-sm sm:text-base font-semibold text-text-primary whitespace-nowrap text-right min-w-[100px] sm:min-w-[130px]">
-                        {formatCurrency(fac.totalTTC || 0)}
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[15px] font-bold text-text-primary group-hover:text-primary transition-colors truncate">
+                        {fac.numero}
                       </span>
+                      <span className="text-xs sm:text-sm text-text-secondary truncate mt-0.5">
+                        {fac.clientNom || fac.dateEmission}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Montant + Statut */}
+                  <div className="flex items-center gap-3 sm:gap-5 shrink-0">
+                    <span className="text-sm sm:text-base font-bold text-text-primary whitespace-nowrap text-right tabular-nums min-w-[90px] sm:min-w-[110px]">
+                      {formatCurrency(fac.totalTTC || 0)}
+                    </span>
+
+                    <div className="w-28 sm:w-32 flex justify-end shrink-0">
                       {fac.statut === 'payee' && (
-                        <span className="bg-success/15 text-success text-label-sm font-label-sm px-3 py-1 rounded-full w-24 text-center shrink-0">{t('status.paid')}</span>
+                        <span className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 text-xs font-semibold px-3 py-1 rounded-full text-center whitespace-nowrap">
+                          {t('status.paid')}
+                        </span>
                       )}
                       {fac.statut === 'attente' && (
-                        <span className="bg-warning/15 text-warning text-label-sm font-label-sm px-3 py-1 rounded-full w-24 text-center shrink-0">{t('status.pending')}</span>
+                        <span className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25 text-xs font-semibold px-3 py-1 rounded-full text-center whitespace-nowrap">
+                          {t('status.pending')}
+                        </span>
                       )}
                       {fac.statut === 'retard' && (
-                        <span className="bg-error/15 text-error text-label-sm font-label-sm px-3 py-1 rounded-full w-24 text-center shrink-0">{t('status.overdue')}</span>
+                        <span className="bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/25 text-xs font-semibold px-3 py-1 rounded-full text-center whitespace-nowrap">
+                          {t('status.overdue')}
+                        </span>
                       )}
                       {fac.statut === 'annulee' && (
-                        <span className="bg-surface-container-highest text-text-secondary text-label-sm font-label-sm px-3 py-1 rounded-full w-24 text-center shrink-0">{t('status.cancelled')}</span>
+                        <span className="bg-surface-container-highest text-text-secondary border border-border-base text-xs font-semibold px-3 py-1 rounded-full text-center whitespace-nowrap">
+                          {t('status.cancelled')}
+                        </span>
                       )}
                     </div>
-                  </Link>
-                ))}
-              </div>
+                  </div>
+                </Link>
+              ))
             )}
           </div>
         </div>
