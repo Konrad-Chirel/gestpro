@@ -420,7 +420,7 @@ export default function ClientsPage() {
               <button
                 type="button"
                 onClick={handleDeleteConfirm}
-                className="px-4 py-2 rounded-xl bg-error hover:bg-error/90 text-white text-xs font-semibold transition-colors shadow-sm cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-error hover:bg-error/90 text-on-error text-xs font-semibold transition-colors shadow-sm cursor-pointer"
               >
                 {t('Supprimer')}
               </button>

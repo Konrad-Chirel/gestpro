@@ -2,6 +2,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 @import "tailwindcss";
 
+/* `dark:` follows the app's theme toggle (class on <html>), not the OS setting. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme inline {
   /* ── Surface / Background ── */
   --color-surface: var(--theme-surface);
@@ -125,73 +128,81 @@
 :root,
 [data-theme="dark"],
 .dark {
-  /* ── Dark Theme (Default) ── */
-  --theme-surface: #141414;
-  --theme-surface-dim: #131313;
-  --theme-surface-bright: #3a3939;
-  --theme-surface-container-lowest: #0e0e0e;
-  --theme-surface-container-low: #1c1b1b;
-  --theme-surface-container: #201f1f;
-  --theme-surface-container-high: #2a2a2a;
-  --theme-surface-container-highest: #353534;
-  --theme-surface-variant: #353534;
-  --theme-surface-tint: #ffb690;
-  --theme-background: #131313;
+  /* ── Dark Theme (Default) ──
+     Built on the same cool slate family as the light theme (hue ~215°),
+     so both modes read as one product. Elevation goes up in lightness:
+     background < container-low < surface (cards) < container < high < highest.
+     Brand orange is lifted one step (orange-400) so it keeps its punch on dark
+     surfaces while staying AA-compliant with dark ink text on top of it. */
+  color-scheme: dark;
 
-  --theme-on-surface: #e5e2e1;
-  --theme-on-surface-variant: #e0c0b1;
-  --theme-on-background: #e5e2e1;
-  --theme-text-primary: #FFFFFF;
-  --theme-text-secondary: #A1A1AA;
+  --theme-background: #0E1217;
+  --theme-surface-dim: #0B0E12;
+  --theme-surface-container-low: #12171D;
+  --theme-surface: #151A21;
+  --theme-surface-container-lowest: #1A2029;
+  --theme-surface-container: #1B212A;
+  --theme-surface-container-high: #222933;
+  --theme-surface-container-highest: #2B333F;
+  --theme-surface-variant: #262E39;
+  --theme-surface-bright: #323B47;
+  --theme-surface-tint: #FB923C;
 
-  --theme-primary: #ffb690;
-  --theme-on-primary: #552100;
-  --theme-primary-container: #f97316;
-  --theme-on-primary-container: #582200;
-  --theme-primary-hover: #EA580C;
-  --theme-primary-fixed: #ffdbca;
-  --theme-primary-fixed-dim: #ffb690;
-  --theme-on-primary-fixed: #341100;
-  --theme-on-primary-fixed-variant: #783200;
-  --theme-inverse-primary: #9d4300;
+  --theme-on-surface: #E3E8EF;
+  --theme-on-surface-variant: #9BA6B5;
+  --theme-on-background: #E3E8EF;
+  --theme-text-primary: #F2F5F9;
+  --theme-text-secondary: #8D98A8;
 
-  --theme-secondary: #c8c6c5;
-  --theme-on-secondary: #313030;
-  --theme-secondary-container: #4a4949;
-  --theme-on-secondary-container: #bab8b7;
-  --theme-secondary-fixed: #e5e2e1;
-  --theme-secondary-fixed-dim: #c8c6c5;
-  --theme-on-secondary-fixed: #1c1b1b;
-  --theme-on-secondary-fixed-variant: #474646;
+  --theme-primary: #FB923C;
+  --theme-on-primary: #1A0B02;
+  --theme-primary-container: #F97316;
+  --theme-on-primary-container: #1A0B02;
+  --theme-primary-hover: #FDA762;
+  --theme-primary-fixed: #FFEDD5;
+  --theme-primary-fixed-dim: #FDBA74;
+  --theme-on-primary-fixed: #431407;
+  --theme-on-primary-fixed-variant: #7C2D12;
+  --theme-inverse-primary: #C2410C;
 
-  --theme-tertiary: #93ccff;
-  --theme-on-tertiary: #003351;
-  --theme-tertiary-container: #00a2f4;
-  --theme-on-tertiary-container: #003554;
-  --theme-tertiary-fixed: #cde5ff;
-  --theme-tertiary-fixed-dim: #93ccff;
-  --theme-on-tertiary-fixed: #001d32;
-  --theme-on-tertiary-fixed-variant: #004b74;
+  --theme-secondary: #AEB8C6;
+  --theme-on-secondary: #1A2029;
+  --theme-secondary-container: #2B333F;
+  --theme-on-secondary-container: #D3DAE4;
+  --theme-secondary-fixed: #E3E8EF;
+  --theme-secondary-fixed-dim: #AEB8C6;
+  --theme-on-secondary-fixed: #12171D;
+  --theme-on-secondary-fixed-variant: #3A4350;
 
-  --theme-error: #EF4444;
-  --theme-on-error: #690005;
-  --theme-error-container: #93000a;
-  --theme-on-error-container: #ffdad6;
-  --theme-warning: #F59E0B;
-  --theme-success: #22C55E;
+  --theme-tertiary: #7DBBFF;
+  --theme-on-tertiary: #04213D;
+  --theme-tertiary-container: #3FA4F5;
+  --theme-on-tertiary-container: #04213D;
+  --theme-tertiary-fixed: #DCEEFF;
+  --theme-tertiary-fixed-dim: #7DBBFF;
+  --theme-on-tertiary-fixed: #04213D;
+  --theme-on-tertiary-fixed-variant: #0B4A7A;
 
-  --theme-outline: #a78b7d;
-  --theme-outline-variant: #584237;
-  --theme-border-base: #262626;
-  --theme-input-bg: #1A1A1A;
+  --theme-error: #F87171;
+  --theme-on-error: #2A0707;
+  --theme-error-container: #3A1518;
+  --theme-on-error-container: #FECACA;
+  --theme-warning: #FBBF24;
+  --theme-success: #34D399;
 
-  --theme-inverse-surface: #e5e2e1;
-  --theme-inverse-on-surface: #313030;
+  --theme-outline: #4E5967;
+  --theme-outline-variant: #2C3440;
+  --theme-border-base: #232A34;
+  --theme-input-bg: #10151B;
+
+  --theme-inverse-surface: #E3E8EF;
+  --theme-inverse-on-surface: #1A2029;
 }
 
 [data-theme="light"],
 .light {
   /* ── Light Theme (Clean, Crisp, Professional SaaS) ── */
+  color-scheme: light;
   --theme-surface: #FFFFFF;
   --theme-surface-dim: #F8FAFC;
   --theme-surface-bright: #FFFFFF;

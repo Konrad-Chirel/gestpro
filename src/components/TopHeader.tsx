@@ -538,7 +538,7 @@ export default function TopHeader({ onMenuClick }: { onMenuClick?: () => void })
 
               {/* Dynamic Number Badge on Bell Icon */}
               {unreadNotificationsCount > 0 ? (
-                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-error text-white font-bold text-[10px] rounded-full flex items-center justify-center shadow-md animate-pulse ring-2 ring-background">
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-error text-on-error font-bold text-[10px] rounded-full flex items-center justify-center shadow-md animate-pulse ring-2 ring-background">
                   {unreadNotificationsCount > 99 ? '99+' : unreadNotificationsCount}
                 </span>
               ) : (

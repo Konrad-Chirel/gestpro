@@ -171,7 +171,7 @@ export default function ClientDetailPage() {
           <button
             type="button"
             onClick={() => setIsDeleteModalOpen(true)}
-            className="flex-1 sm:flex-none h-10 sm:h-11 px-4 sm:px-6 rounded-lg bg-error/15 text-error border border-error/20 hover:bg-error hover:text-white transition-colors text-sm font-medium flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+            className="flex-1 sm:flex-none h-10 sm:h-11 px-4 sm:px-6 rounded-lg bg-error/15 text-error border border-error/20 hover:bg-error hover:text-on-error transition-colors text-sm font-medium flex items-center justify-center gap-2 shadow-sm cursor-pointer"
           >
             <span className="material-symbols-outlined text-[18px]">delete</span>
             <span>{t('Supprimer')}</span>
@@ -676,7 +676,7 @@ export default function ClientDetailPage() {
               <button
                 type="button"
                 onClick={handleDeleteConfirm}
-                className="px-5 py-2.5 rounded-lg bg-error hover:bg-error/90 text-white transition-colors text-xs font-semibold shadow-md cursor-pointer flex items-center gap-1.5"
+                className="px-5 py-2.5 rounded-lg bg-error hover:bg-error/90 text-on-error transition-colors text-xs font-semibold shadow-md cursor-pointer flex items-center gap-1.5"
               >
                 <span className="material-symbols-outlined text-[16px]">delete</span>
                 <span>{t('Confirmer la suppression')}</span>

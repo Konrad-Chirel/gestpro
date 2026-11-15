@@ -486,7 +486,7 @@ export default function CommandeDetailPage() {
               <button
                 type="button"
                 onClick={handleDeleteConfirm}
-                className="px-5 py-2.5 rounded-lg bg-error hover:bg-error/90 text-white transition-colors text-xs font-semibold shadow-md cursor-pointer flex items-center gap-1.5"
+                className="px-5 py-2.5 rounded-lg bg-error hover:bg-error/90 text-on-error transition-colors text-xs font-semibold shadow-md cursor-pointer flex items-center gap-1.5"
               >
                 <span className="material-symbols-outlined text-[16px]">delete</span>
                 <span>{t('Confirmer la suppression')}</span>
