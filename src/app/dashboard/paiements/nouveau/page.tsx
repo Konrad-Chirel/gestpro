@@ -17,11 +17,16 @@ export default function EnregistrerPaiementPage() {
 
   const [selectedFactureId, setSelectedFactureId] = useState<string>('');
   const [montant, setMontant] = useState<string>('');
-  const [datePaiement, setDatePaiement] = useState<string>(() => new Date().toISOString().split('T')[0]);
+  const [datePaiement, setDatePaiement] = useState<string>('');
   const [methode, setMethode] = useState<string>('virement');
-  const [reference, setReference] = useState<string>(() => `PAY-${Date.now().toString().slice(-6)}`);
+  const [reference, setReference] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+
+  useEffect(() => {
+    setDatePaiement((prev) => prev || new Date().toISOString().split('T')[0]);
+    setReference((prev) => prev || `PAY-${Date.now().toString().slice(-6)}`);
+  }, []);
 
   // Initialize selected invoice from URL or first unpaid invoice
   useEffect(() => {

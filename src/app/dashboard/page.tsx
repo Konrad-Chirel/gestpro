@@ -7,12 +7,10 @@ import { useStore } from '@/context/StoreContext';
 export default function Dashboard() {
   const { clients, commandes, factures, formatCurrency, t, user, userProfile } = useStore();
 
-  const storedName = typeof window !== 'undefined' ? localStorage.getItem('gestpro_user_name') : null;
   const displayName =
     userProfile?.full_name ||
     user?.user_metadata?.full_name ||
     user?.user_metadata?.name ||
-    storedName ||
     'Konrad Chirel';
   const firstName = displayName ? displayName.trim().split(' ')[0] : '';
   const greeting = firstName ? `${t('dashboard.welcome')}, ${firstName}` : t('dashboard.welcome');

@@ -385,13 +385,9 @@ export default function TopHeader({ onMenuClick }: { onMenuClick?: () => void })
     );
   };
 
-  const storedName = typeof window !== 'undefined' ? localStorage.getItem('gestpro_user_name') : null;
-  const storedCompany = typeof window !== 'undefined' ? localStorage.getItem('gestpro_company_name') : null;
-  const storedEmail = typeof window !== 'undefined' ? localStorage.getItem('gestpro_user_email') : null;
-
-  const displayName = userProfile?.full_name || user?.user_metadata?.full_name || user?.user_metadata?.name || storedName || 'Konrad Chirel';
-  const displayCompany = userProfile?.company_name || companySettings?.companyName || storedCompany || 'GestPro S.A.S';
-  const displayEmail = user?.email || userProfile?.email || storedEmail || '';
+  const displayName = userProfile?.full_name || user?.user_metadata?.full_name || user?.user_metadata?.name || 'Konrad Chirel';
+  const displayCompany = userProfile?.company_name || companySettings?.companyName || 'GestPro S.A.S';
+  const displayEmail = user?.email || userProfile?.email || '';
   const initials = displayName
     .split(' ')
     .filter(Boolean)

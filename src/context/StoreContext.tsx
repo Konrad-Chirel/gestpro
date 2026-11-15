@@ -948,7 +948,7 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
     title: "Facture en retard d'échéance",
     message: "La facture FAC-2026-0038 de Amadou Trading (24 000 FCFA) nécessite une relance.",
     time: "Il y a 15 min",
-    timestamp: Date.now() - 15 * 60 * 1000,
+    timestamp: 1763200000000 - 15 * 60 * 1000,
     type: 'invoice',
     icon: 'warning',
     iconBg: 'bg-error/15',
@@ -961,7 +961,7 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
     title: 'Nouvelle commande à préparer',
     message: 'La commande CMD-2026-0046 (Fatou Ndiaye) a été validée et attend sa préparation.',
     time: 'Il y a 1h',
-    timestamp: Date.now() - 60 * 60 * 1000,
+    timestamp: 1763200000000 - 60 * 60 * 1000,
     type: 'order',
     icon: 'shopping_bag',
     iconBg: 'bg-primary/15',
@@ -974,7 +974,7 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
     title: 'Paiement reçu avec succès',
     message: 'Virement de 500 000 FCFA enregistré pour la facture FAC-2026-0035.',
     time: 'Il y a 3h',
-    timestamp: Date.now() - 3 * 60 * 60 * 1000,
+    timestamp: 1763200000000 - 3 * 60 * 60 * 1000,
     type: 'payment',
     icon: 'payments',
     iconBg: 'bg-success/15',
@@ -987,7 +987,7 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
     title: 'Alerte stock critique',
     message: "Le produit Farine de blé a atteint son seuil d'alerte (stock restant: 12 unités).",
     time: 'Hier',
-    timestamp: Date.now() - 24 * 60 * 60 * 1000,
+    timestamp: 1763200000000 - 24 * 60 * 60 * 1000,
     type: 'alert',
     icon: 'inventory_2',
     iconBg: 'bg-amber-500/15',
@@ -1000,7 +1000,7 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
     title: 'Nouveau client enregistré',
     message: 'Le client "Sénégal Tech Solutions" a été ajouté avec succès.',
     time: 'Il y a 2 jours',
-    timestamp: Date.now() - 48 * 60 * 60 * 1000,
+    timestamp: 1763200000000 - 48 * 60 * 60 * 1000,
     type: 'client',
     icon: 'person_add',
     iconBg: 'bg-tertiary-container/15',
@@ -1167,30 +1167,13 @@ function mapDbProduit(row: any): Produit {
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   const supabase = createClient();
-  const getInitialUserProfile = (): UserProfile => {
-    if (typeof window !== 'undefined') {
-      const savedName = localStorage.getItem('gestpro_user_name');
-      const savedCompany = localStorage.getItem('gestpro_company_name');
-      const savedEmail = localStorage.getItem('gestpro_user_email');
-      if (savedName) {
-        return {
-          id: 'local',
-          full_name: savedName,
-          company_name: savedCompany || 'GestPro S.A.S',
-          email: savedEmail || '',
-        };
-      }
-    }
-    return {
-      id: '',
-      full_name: 'Konrad Chirel',
-      company_name: 'GestPro S.A.S',
-      email: '',
-    };
-  };
-
   const [user, setUser] = useState<User | null>(null);
-  const [userProfile, setUserProfile] = useState<UserProfile>(getInitialUserProfile);
+  const [userProfile, setUserProfile] = useState<UserProfile>({
+    id: '',
+    full_name: 'Konrad Chirel',
+    company_name: 'GestPro S.A.S',
+    email: '',
+  });
   const [isHydrated, setIsHydrated] = useState(false);
   const [theme, setThemeState] = useState<ThemeMode>('dark');
   const [clients, setClients] = useState<Client[]>(INITIAL_CLIENTS);
@@ -1638,6 +1621,23 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
+    try {
+      const savedName = localStorage.getItem('gestpro_user_name');
+      const savedCompany = localStorage.getItem('gestpro_company_name');
+      const savedEmail = localStorage.getItem('gestpro_user_email');
+      if (savedName || savedCompany || savedEmail) {
+        setUserProfile((prev) => ({
+          ...prev,
+          id: prev.id || 'local',
+          full_name: savedName || prev.full_name,
+          company_name: savedCompany || prev.company_name,
+          email: savedEmail || prev.email,
+        }));
+      }
+    } catch {
+      // Ignore storage access errors
+    }
+
     refreshProfile();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event: AuthChangeEvent, session: Session | null) => {

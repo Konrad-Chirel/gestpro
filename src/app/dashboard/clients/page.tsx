@@ -120,9 +120,9 @@ export default function ClientsPage() {
             </div>
             <Link
               href="/dashboard/clients/nouveau"
-              className="bg-primary hover:bg-primary-hover text-on-primary font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-6 rounded-full shadow-md transition-all flex items-center justify-center gap-2 shrink-0 whitespace-nowrap cursor-pointer active:scale-95"
+              className="bg-primary hover:bg-primary-hover text-on-primary font-semibold text-xs sm:text-sm h-10 px-4 sm:px-5 rounded-full shadow-md transition-colors flex items-center justify-center gap-2 shrink-0 whitespace-nowrap cursor-pointer active:scale-95"
             >
-              <span className="material-symbols-outlined text-[20px]">add</span>
+              <span className="material-symbols-outlined text-[18px]">add</span>
               <span>{t('clients.new')}</span>
             </Link>
           </div>
