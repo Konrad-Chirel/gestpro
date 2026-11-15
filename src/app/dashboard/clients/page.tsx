@@ -263,7 +263,7 @@ export default function ClientsPage() {
             <div className="min-w-[900px] flex flex-col gap-3">
               
               {/* Table Header */}
-              <div className="grid grid-cols-[180px_1fr_1.3fr_120px_110px_70px] gap-4 px-6 py-4 bg-surface-container-lowest rounded-xl shadow-sm items-center font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">
+              <div className="grid grid-cols-[180px_1fr_1.3fr_120px_110px_70px] gap-4 px-6 py-3.5 bg-surface-container-high border border-border-base/60 rounded-xl items-center text-xs font-semibold text-on-surface-variant">
                 <div>{t('clients.col_client')}</div>
                 <div>{t('clients.col_company')}</div>
                 <div>{t('clients.col_contact')}</div>

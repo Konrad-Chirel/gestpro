@@ -292,7 +292,7 @@ export default function FacturesPage() {
         <div className="flex flex-col gap-3 overflow-x-auto w-full pb-16">
           <div className="min-w-[1000px] flex flex-col gap-3">
             {/* Headers */}
-            <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-surface-container-highest rounded-xl text-label-sm text-text-secondary uppercase tracking-widest items-center">
+            <div className="grid grid-cols-12 gap-4 px-6 py-3.5 bg-surface-container-high border border-border-base/60 rounded-xl text-xs font-semibold text-text-secondary items-center">
               <div className="col-span-2">{t('N° Facture')}</div>
               <div className="col-span-1">{t('Cmd')}</div>
               <div className="col-span-3">{t('Client')}</div>

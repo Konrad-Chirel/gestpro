@@ -1022,8 +1022,8 @@ export default function HistoriquePage() {
             {/* Quick Filters Card */}
             <div className="bg-surface rounded-xl border border-border-base p-6 shadow-sm">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="font-label-md text-label-md text-text-secondary uppercase tracking-wider m-0">
-                  {t('FILTRES RAPIDES')}
+                <h3 className="text-sm font-semibold text-text-primary m-0">
+                  {t('Filtres rapides')}
                 </h3>
                 {(selectedPeriod !== '7jours' || selectedUser !== currentUserName || activeFilter !== 'tous') && (
                   <button
@@ -1175,8 +1175,8 @@ export default function HistoriquePage() {
             {/* Weekly Activity Summary */}
             <div className="bg-surface rounded-xl border border-border-base p-6 shadow-sm">
               <div className="flex items-center justify-between gap-2 mb-6">
-                <h3 className="font-label-sm text-[11px] sm:text-xs font-semibold text-text-secondary uppercase tracking-wider m-0">
-                  {t('ACTIVITÉ DE LA SEMAINE')}
+                <h3 className="text-sm font-semibold text-text-primary m-0">
+                  {t('Activité de la semaine')}
                 </h3>
                 <span className="inline-flex items-center justify-center text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary whitespace-nowrap shrink-0 border border-primary/20">
                   {t('7 jours')}

@@ -281,59 +281,55 @@ export default function PaiementsPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
-        <div className="bg-surface rounded-xl p-6 shadow-md border-b-4 border-success">
-          <div className="flex justify-between items-start mb-4">
-            <div className="flex flex-col">
-              <span className="font-label-md text-text-secondary uppercase tracking-wider">{t('Encaissé (Mois)')}</span>
-              <span className="font-headline-lg md:font-display-lg text-success mt-2">
-                {formatCurrency(metrics.totalEncaisse)}
-              </span>
-            </div>
-            <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center">
-              <span className="material-symbols-outlined text-success">check_circle</span>
-            </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 relative z-10">
+        <div className="bg-surface rounded-2xl p-5 sm:p-6 border border-border-base shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-4">
+          <div className="flex justify-between items-start">
+            <span className="text-xs sm:text-sm font-medium text-text-secondary">
+              {t('Encaissé (Mois)')}
+            </span>
+            <span className="material-symbols-outlined text-emerald-500 text-[22px]">check_circle</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-success text-[16px]">trending_up</span>
-            <span className="font-body-sm text-text-secondary">+12.5% {t('dashboard.vs_last_month')}</span>
+          <div className="flex flex-col gap-1">
+            <span className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight tabular-nums">
+              {formatCurrency(metrics.totalEncaisse)}
+            </span>
+            <div className="flex items-center gap-1.5 pt-1">
+              <span className="text-xs text-emerald-500 font-medium">+12.5% {t('dashboard.vs_last_month')}</span>
+            </div>
           </div>
         </div>
-        
-        <div className="bg-surface rounded-xl p-6 shadow-md border-b-4 border-warning">
-          <div className="flex justify-between items-start mb-4">
-            <div className="flex flex-col">
-              <span className="font-label-md text-text-secondary uppercase tracking-wider">{t('En attente')}</span>
-              <span className="font-headline-lg md:font-display-lg text-warning mt-2">
-                {formatCurrency(metrics.totalEnAttente)}
-              </span>
-            </div>
-            <div className="w-12 h-12 rounded-full bg-warning/10 flex items-center justify-center">
-              <span className="material-symbols-outlined text-warning">pending</span>
-            </div>
+
+        <div className="bg-surface rounded-2xl p-5 sm:p-6 border border-border-base shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-4">
+          <div className="flex justify-between items-start">
+            <span className="text-xs sm:text-sm font-medium text-text-secondary">
+              {t('En attente')}
+            </span>
+            <span className="material-symbols-outlined text-amber-500 text-[22px]">schedule</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="font-body-sm text-text-secondary">
+          <div className="flex flex-col gap-1">
+            <span className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight tabular-nums">
+              {formatCurrency(metrics.totalEnAttente)}
+            </span>
+            <span className="text-xs text-text-secondary pt-1">
               {metrics.nbPaiementsEnAttente} {metrics.nbPaiementsEnAttente > 1 ? t('paiements en cours') : t('paiement en cours')}
             </span>
           </div>
         </div>
-        
-        <div className="bg-surface rounded-xl p-6 shadow-md border-b-4 border-error">
-          <div className="flex justify-between items-start mb-4">
-            <div className="flex flex-col">
-              <span className="font-label-md text-text-secondary uppercase tracking-wider">{t('En retard')}</span>
-              <span className="font-headline-lg md:font-display-lg text-error mt-2">
-                {formatCurrency(metrics.totalEnRetard)}
-              </span>
-            </div>
-            <div className="w-12 h-12 rounded-full bg-error/10 flex items-center justify-center">
-              <span className="material-symbols-outlined text-error">error</span>
-            </div>
+
+        <div className="bg-surface rounded-2xl p-5 sm:p-6 border border-border-base shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-4">
+          <div className="flex justify-between items-start">
+            <span className="text-xs sm:text-sm font-medium text-text-secondary">
+              {t('En retard')}
+            </span>
+            <span className="material-symbols-outlined text-rose-500 text-[22px]">error</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-error text-[16px]">trending_up</span>
-            <span className="font-body-sm text-text-secondary">+4.2% {t('dashboard.vs_last_month')}</span>
+          <div className="flex flex-col gap-1">
+            <span className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight tabular-nums">
+              {formatCurrency(metrics.totalEnRetard)}
+            </span>
+            <span className="text-xs text-rose-500 font-medium pt-1">
+              +4.2% {t('dashboard.vs_last_month')}
+            </span>
           </div>
         </div>
       </div>
@@ -394,7 +390,7 @@ export default function PaiementsPage() {
         <div className="flex flex-col gap-3 overflow-x-auto w-full pb-16">
           <div className="min-w-[1000px] flex flex-col gap-3">
             {/* Headers */}
-            <div className="grid grid-cols-[110px_100px_minmax(150px,1fr)_120px_160px_120px_100px] gap-4 px-6 py-3 bg-surface-container-highest rounded-xl text-label-sm text-text-secondary uppercase tracking-widest items-center">
+            <div className="grid grid-cols-[110px_100px_minmax(150px,1fr)_120px_160px_120px_100px] gap-4 px-6 py-3.5 bg-surface-container-high border border-border-base/60 rounded-xl text-xs font-semibold text-text-secondary items-center">
               <div className="">{t('Date')}</div>
               <div className="">{t('Facture')}</div>
               <div className="">{t('Client')}</div>

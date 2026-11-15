@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import "./globals.css";
 import { StoreProvider } from "@/context/StoreContext";
 
@@ -14,29 +13,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" suppressHydrationWarning>
+    <html lang="fr" className="dark" data-theme="dark" suppressHydrationWarning>
       <head>
-        <Script
-          id="theme-initializer"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              try {
-                var t = localStorage.getItem('gestpro_theme');
-                var d = document.documentElement;
-                if (t === 'light') {
-                  d.classList.remove('dark');
-                  d.classList.add('light');
-                  d.setAttribute('data-theme', 'light');
-                } else {
-                  d.classList.remove('light');
-                  d.classList.add('dark');
-                  d.setAttribute('data-theme', 'dark');
-                }
-              } catch(e) {}
-            `,
-          }}
-        />
         <link rel="preload" href="/fonts/material-symbols-outlined.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
