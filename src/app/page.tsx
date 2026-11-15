@@ -75,21 +75,21 @@ export default function LandingPage() {
 
       <main className="w-full">
         {/* ── HERO SECTION ── */}
-        <section className="relative pt-12 sm:pt-20 pb-16 sm:pb-24 border-b border-border-base overflow-hidden">
+        <section className="relative pt-9 sm:pt-16 lg:pt-20 pb-14 sm:pb-24 border-b border-border-base overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
             {/* Sub-badge: Institutional & precise */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border-base bg-surface text-xs font-medium text-text-secondary mb-6 sm:mb-8 shadow-2xs">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border-base bg-surface text-[11px] sm:text-xs font-medium text-text-secondary mb-5 sm:mb-7 shadow-2xs">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
               <span>Version 2026 · Système certifié pour PME et cabinets</span>
             </div>
 
             {/* Main Headline: Strict, authoritative, no AI italic gimmick */}
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-text-primary max-w-4xl leading-[1.12]">
+            <h1 className="text-[22px] sm:text-4xl lg:text-[44px] font-bold tracking-tight text-text-primary max-w-3xl leading-[1.2] sm:leading-[1.15]">
               La gestion commerciale et la facturation, avec la rigueur d’un progiciel moderne.
             </h1>
 
             {/* Value Proposition */}
-            <p className="mt-5 sm:mt-6 text-sm sm:text-lg text-text-secondary max-w-2xl leading-relaxed">
+            <p className="mt-4 sm:mt-5 text-[13px] sm:text-base lg:text-lg text-text-secondary max-w-2xl leading-relaxed">
               Bons de commande, suivi précis des encaissements en FCFA et EUR, factures certifiées, acomptes et relances automatisées — réunis dans un outil conçu pour la vitesse et la conformité comptable.
             </p>
 
