@@ -299,12 +299,24 @@ export default function CommandesPage() {
     doc.save(fileName);
   };
 
-  const totalRevenuTTC = useMemo(() => {
-    return (commandes || []).reduce((acc, c) => acc + (c.totalTTC || 0), 0);
-  }, [commandes]);
+  const stats = useMemo(() => {
+    const totalCount = (commandes || []).length;
+    const attenteCount = (commandes || []).filter((c) => c.statut === 'attente').length;
+    const prepCount = (commandes || []).filter((c) => c.statut === 'preparation').length;
+    const livreeCount = (commandes || []).filter((c) => c.statut === 'livree').length;
+    const activePipelineCount = attenteCount + prepCount;
+    const totalRevenu = (commandes || []).reduce((acc, c) => acc + (c.totalTTC || 0), 0);
+    const pctLivree = totalCount > 0 ? Math.round((livreeCount / totalCount) * 100) : 0;
 
-  const totalAttenteCount = useMemo(() => {
-    return (commandes || []).filter((c) => c.statut === 'attente').length;
+    return {
+      totalCount,
+      attenteCount,
+      prepCount,
+      livreeCount,
+      activePipelineCount,
+      totalRevenu,
+      pctLivree,
+    };
   }, [commandes]);
 
   const renderBadge = (statut: TableOrder['statut']) => {
@@ -345,50 +357,77 @@ export default function CommandesPage() {
         </Link>
       </div>
 
-      {/* Visual Richness: KPI Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-surface rounded-2xl p-6 shadow-md relative overflow-hidden group border border-border-base">
-          <div className="absolute -right-8 -top-8 w-32 h-32 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all"></div>
-          <p className="font-label-sm text-text-secondary uppercase tracking-widest mb-2">{t('Total Mensuel')}</p>
-          <div className="flex items-end gap-2 xl:gap-4 justify-between min-w-0">
-            <p className="text-xl sm:text-2xl xl:text-3xl font-bold text-text-primary whitespace-nowrap">
-              {commandes.length}
-            </p>
-            <div className="w-16 sm:w-20 xl:w-24 h-10 xl:h-12 text-primary shrink-0">
-              <svg className="w-full h-full stroke-current fill-none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" viewBox="0 0 100 40">
-                <path d="M0,30 Q10,25 20,28 T40,15 T60,20 T80,5 T100,10"></path>
-              </svg>
-            </div>
+      {/* KPI Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        {/* Card 1: Total Commandes */}
+        <div className="bg-surface rounded-2xl p-5 sm:p-6 border border-border-base shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-4 relative overflow-hidden group">
+          <div className="flex justify-between items-start">
+            <span className="text-xs sm:text-sm font-medium text-text-secondary">
+              {t('Total commandes')}
+            </span>
+            <span className="material-symbols-outlined text-primary text-[22px]">shopping_bag</span>
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight tabular-nums">
+              {stats.totalCount}
+            </span>
+            <span className="text-xs text-text-secondary pt-1">
+              Dossiers enregistrés dans l’ERP
+            </span>
           </div>
         </div>
 
-        <div className="bg-surface rounded-2xl p-6 shadow-md relative overflow-hidden group border border-border-base">
-          <div className="absolute -right-8 -top-8 w-32 h-32 bg-warning/10 rounded-full blur-2xl group-hover:bg-warning/20 transition-all"></div>
-          <p className="font-label-sm text-text-secondary uppercase tracking-widest mb-2">{t('En Attente')}</p>
-          <div className="flex items-end gap-2 xl:gap-4 justify-between min-w-0">
-            <p className="text-xl sm:text-2xl xl:text-3xl font-bold text-text-primary whitespace-nowrap">
-              {totalAttenteCount}
-            </p>
-            <div className="w-16 sm:w-20 xl:w-24 h-10 xl:h-12 text-warning shrink-0">
-              <svg className="w-full h-full stroke-current fill-none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" viewBox="0 0 100 40">
-                <path d="M0,20 Q15,22 25,18 T50,25 T75,10 T100,15"></path>
-              </svg>
-            </div>
+        {/* Card 2: En cours de traitement */}
+        <div className="bg-surface rounded-2xl p-5 sm:p-6 border border-border-base shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-4 relative overflow-hidden group">
+          <div className="flex justify-between items-start">
+            <span className="text-xs sm:text-sm font-medium text-text-secondary">
+              {t('En traitement')}
+            </span>
+            <span className="material-symbols-outlined text-amber-500 text-[22px]">pending_actions</span>
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight tabular-nums">
+              {stats.activePipelineCount}
+            </span>
+            <span className="text-xs text-amber-600 dark:text-amber-400 font-medium pt-1">
+              {stats.attenteCount} en attente · {stats.prepCount} en préparation
+            </span>
           </div>
         </div>
 
-        <div className="bg-surface rounded-2xl p-6 shadow-md relative overflow-hidden group border border-border-base">
-          <div className="absolute -right-8 -top-8 w-32 h-32 bg-success/10 rounded-full blur-2xl group-hover:bg-success/20 transition-all"></div>
-          <p className="font-label-sm text-text-secondary uppercase tracking-widest mb-2">{t('Revenu (TTC)')}</p>
-          <div className="flex items-end gap-2 xl:gap-4 justify-between min-w-0">
-            <p className="text-xl sm:text-2xl xl:text-3xl font-bold text-text-primary whitespace-nowrap">
-              {formatCurrency(totalRevenuTTC)}
-            </p>
-            <div className="w-16 sm:w-20 xl:w-24 h-10 xl:h-12 text-success shrink-0">
-              <svg className="w-full h-full stroke-current fill-none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" viewBox="0 0 100 40">
-                <path d="M0,35 Q20,30 30,15 T60,20 T80,5 T100,0"></path>
-              </svg>
-            </div>
+        {/* Card 3: Commandes livrées */}
+        <div className="bg-surface rounded-2xl p-5 sm:p-6 border border-border-base shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-4 relative overflow-hidden group">
+          <div className="flex justify-between items-start">
+            <span className="text-xs sm:text-sm font-medium text-text-secondary">
+              {t('Commandes livrées')}
+            </span>
+            <span className="material-symbols-outlined text-emerald-500 text-[22px]">local_shipping</span>
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight tabular-nums">
+              {stats.livreeCount}
+            </span>
+            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium pt-1">
+              {stats.pctLivree}% du volume total acheminé
+            </span>
+          </div>
+        </div>
+
+        {/* Card 4: Volume d'affaires */}
+        <div className="bg-surface rounded-2xl p-5 sm:p-6 border border-border-base shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-4 relative overflow-hidden group">
+          <div className="flex justify-between items-start">
+            <span className="text-xs sm:text-sm font-medium text-text-secondary">
+              {t('Volume d’affaires (TTC)')}
+            </span>
+            <span className="material-symbols-outlined text-sky-400 text-[22px]">payments</span>
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight tabular-nums">
+              {formatCurrency(stats.totalRevenu)}
+            </span>
+            <span className="text-xs text-text-secondary pt-1">
+              Valeur cumulée des commandes
+            </span>
           </div>
         </div>
       </div>
@@ -463,7 +502,7 @@ export default function CommandesPage() {
         <div className="w-full overflow-x-auto">
           <div className="min-w-[1000px] flex flex-col gap-3">
             {/* Headers */}
-            <div className="grid grid-cols-[1.5fr_2fr_1.4fr_0.8fr_1.3fr_1.3fr_1fr] gap-4 px-6 py-3 bg-surface-container-highest rounded-xl text-label-sm text-text-secondary uppercase tracking-widest items-center">
+            <div className="grid grid-cols-[1.5fr_2fr_1.4fr_0.8fr_1.3fr_1.3fr_1fr] gap-4 px-6 py-3.5 bg-surface-container-high border border-border-base/60 rounded-xl text-xs font-semibold text-text-secondary items-center">
               <div>{t('N° Commande')}</div>
               <div>{t('Client')}</div>
               <div>{t('Date')}</div>
@@ -475,7 +514,7 @@ export default function CommandesPage() {
 
             {/* Rows */}
             {filteredOrders.length === 0 ? (
-              <div className="py-12 text-center bg-surface rounded-xl shadow-md border border-border-base">
+              <div className="py-12 text-center bg-surface rounded-xl shadow-xs border border-border-base">
                 <span className="material-symbols-outlined text-4xl text-text-secondary mb-2">shopping_bag</span>
                 <p className="text-text-secondary font-body-sm">{t('Aucune commande ne correspond aux critères.')}</p>
               </div>
@@ -484,7 +523,7 @@ export default function CommandesPage() {
                 <div
                   key={cmd.id}
                   onClick={() => router.push(`/dashboard/commandes/${cmd.id}`)}
-                  className="grid grid-cols-[1.5fr_2fr_1.4fr_0.8fr_1.3fr_1.3fr_1fr] gap-4 px-6 py-5 bg-surface hover:bg-surface-container-lowest rounded-xl shadow-md transition-all items-center group cursor-pointer border border-transparent hover:border-border-base/50"
+                  className="grid grid-cols-[1.5fr_2fr_1.4fr_0.8fr_1.3fr_1.3fr_1fr] gap-4 px-6 py-4 bg-surface hover:bg-surface-container-high rounded-xl border border-border-base/60 shadow-xs transition-all items-center group cursor-pointer"
                 >
                   <div
                     className={`font-label-md ${
