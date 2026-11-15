@@ -8,20 +8,20 @@ export default function LandingPage() {
   const { theme, toggleTheme, user } = useStore();
 
   return (
-    <div className="bg-background font-body-md text-on-surface min-h-screen transition-colors duration-150 selection:bg-primary/20 selection:text-primary">
+    <div className="bg-background font-body-md text-on-surface min-h-screen overflow-x-hidden transition-colors duration-150 selection:bg-primary/20 selection:text-primary">
       {/* ── TOP NAVIGATION BAR ── */}
       <header className="sticky top-0 w-full z-50 bg-background/90 backdrop-blur-md border-b border-border-base transition-colors duration-150">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4">
           {/* Brand */}
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary text-on-primary flex items-center justify-center font-bold text-sm sm:text-base shadow-xs shadow-primary/30">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 shrink-0">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-primary text-on-primary flex items-center justify-center font-bold text-xs sm:text-base shadow-xs shadow-primary/30 shrink-0">
               GP
             </div>
-            <div className="flex flex-col">
+            <div className="flex flex-col min-w-0">
               <span className="font-bold text-base sm:text-lg tracking-tight text-text-primary leading-none">
                 GestPro
               </span>
-              <span className="text-[10px] text-text-secondary font-medium tracking-wide">
+              <span className="hidden sm:block text-[10px] text-text-secondary font-medium tracking-wide">
                 ERP Commercial &amp; Facturation
               </span>
             </div>
@@ -61,12 +61,13 @@ export default function LandingPage() {
             {/* Dashboard Access Button */}
             <Link
               href={user ? '/dashboard' : '/login'}
-              className="inline-flex items-center gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-lg bg-primary hover:bg-primary-hover text-on-primary font-medium text-xs sm:text-sm transition-colors shadow-xs shadow-primary/20 cursor-pointer shrink-0"
+              className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg bg-primary hover:bg-primary-hover text-on-primary font-medium text-xs sm:text-sm transition-colors shadow-xs shadow-primary/20 cursor-pointer shrink-0 whitespace-nowrap"
             >
-              <span className="material-symbols-outlined text-[16px] sm:text-[18px]">
+              <span className="material-symbols-outlined text-[16px] sm:text-[18px] shrink-0">
                 dashboard
               </span>
-              <span>{user ? 'Mon tableau de bord' : 'Accéder à l’espace'}</span>
+              <span className="sm:hidden">{user ? 'Dashboard' : 'Mon espace'}</span>
+              <span className="hidden sm:inline">{user ? 'Mon tableau de bord' : 'Accéder à l’espace'}</span>
             </Link>
           </div>
         </div>
@@ -158,7 +159,7 @@ export default function LandingPage() {
 
                     {/* Invoice Line Items */}
                     <div className="overflow-x-auto">
-                      <table className="w-full text-left border-collapse text-xs">
+                      <table className="w-full min-w-[540px] text-left border-collapse text-xs">
                         <thead>
                           <tr className="border-b border-border-base text-text-secondary font-semibold">
                             <th className="pb-2.5">Désignation de la prestation</th>
@@ -319,9 +320,9 @@ export default function LandingPage() {
         {/* ── METRICS & TRUST STRIP ── */}
         <section className="border-b border-border-base bg-surface py-8 sm:py-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center md:text-left divide-y md:divide-y-0 md:divide-x divide-border-base">
-              <div className="pt-4 md:pt-0 md:px-6 first:pl-0">
-                <div className="font-mono text-xl sm:text-2xl font-bold text-text-primary tabular-nums">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-5 sm:gap-6 text-center md:text-left md:divide-x divide-border-base">
+              <div className="py-1 md:py-0 md:px-6 md:first:pl-0">
+                <div className="font-mono text-lg sm:text-2xl font-bold text-text-primary tabular-nums">
                   100% RLS
                 </div>
                 <div className="text-xs text-text-secondary mt-1">
@@ -329,8 +330,8 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              <div className="pt-4 md:pt-0 md:px-6">
-                <div className="font-mono text-xl sm:text-2xl font-bold text-text-primary tabular-nums">
+              <div className="py-1 md:py-0 md:px-6">
+                <div className="font-mono text-lg sm:text-2xl font-bold text-text-primary tabular-nums">
                   FCFA &amp; EUR
                 </div>
                 <div className="text-xs text-text-secondary mt-1">
@@ -338,8 +339,8 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              <div className="pt-4 md:pt-0 md:px-6">
-                <div className="font-mono text-xl sm:text-2xl font-bold text-text-primary tabular-nums">
+              <div className="py-1 md:py-0 md:px-6">
+                <div className="font-mono text-lg sm:text-2xl font-bold text-text-primary tabular-nums">
                   PDF &amp; Resend
                 </div>
                 <div className="text-xs text-text-secondary mt-1">
@@ -347,8 +348,8 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              <div className="pt-4 md:pt-0 md:px-6 last:pr-0">
-                <div className="font-mono text-xl sm:text-2xl font-bold text-text-primary tabular-nums">
+              <div className="py-1 md:py-0 md:px-6 md:last:pr-0">
+                <div className="font-mono text-lg sm:text-2xl font-bold text-text-primary tabular-nums">
                   &lt; 150 ms
                 </div>
                 <div className="text-xs text-text-secondary mt-1">
@@ -519,7 +520,7 @@ export default function LandingPage() {
         {/* ── SECURITY & TECHNICAL INTEGRITY ── */}
         <section id="securite" className="py-16 sm:py-24 border-b border-border-base bg-background scroll-mt-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="p-8 sm:p-12 rounded-3xl border border-border-base bg-surface flex flex-col lg:flex-row items-center justify-between gap-8">
+            <div className="p-5 sm:p-10 lg:p-12 rounded-2xl sm:rounded-3xl border border-border-base bg-surface flex flex-col lg:flex-row items-center justify-between gap-6 sm:gap-8">
               <div className="max-w-xl space-y-4">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border-base bg-surface-container text-xs font-medium text-text-secondary">
                   <span className="material-symbols-outlined text-[16px] text-emerald-500">lock</span>
@@ -533,7 +534,7 @@ export default function LandingPage() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 w-full lg:w-auto shrink-0 font-mono text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full lg:w-auto shrink-0 font-mono text-xs">
                 <div className="p-4 rounded-xl border border-border-base bg-surface-container-low">
                   <div className="text-text-secondary">Base de données</div>
                   <div className="font-bold text-text-primary mt-1">PostgreSQL 16</div>

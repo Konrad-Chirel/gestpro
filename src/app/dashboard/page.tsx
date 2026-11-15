@@ -78,12 +78,12 @@ export default function Dashboard() {
   }, [clients, commandes, factures]);
 
   return (
-    <div className="flex flex-col w-full gap-8 p-5 sm:p-7 md:p-8 lg:p-10 max-w-7xl mx-auto">
+    <div className="flex flex-col w-full gap-6 sm:gap-8 p-4 sm:p-7 md:p-8 lg:p-10 max-w-7xl mx-auto">
       {/* ── 1. HEADER SECTION (MATCH ONLINE) ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 min-w-0">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-text-primary flex items-center gap-2.5">
-            <span>{greeting}</span>
+            <span className="truncate">{greeting}</span>
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 inline-block"></span>
           </h1>
           <p className="text-sm sm:text-base text-text-secondary">
@@ -92,20 +92,20 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 sm:gap-3 w-full sm:w-auto shrink-0">
           <Link
             href="/dashboard/commandes/nouveau"
-            className="inline-flex items-center gap-2 h-10 px-4 rounded-xl border border-border-base bg-surface hover:bg-surface-container text-text-primary text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
+            className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 h-10 px-3.5 sm:px-4 rounded-xl border border-border-base bg-surface hover:bg-surface-container text-text-primary text-xs sm:text-sm font-semibold transition-colors cursor-pointer whitespace-nowrap"
           >
-            <span className="material-symbols-outlined text-[18px]">add</span>
+            <span className="material-symbols-outlined text-[18px] shrink-0">add</span>
             <span>Nouvelle commande</span>
           </Link>
 
           <Link
             href="/dashboard/factures/nouveau"
-            className="inline-flex items-center gap-2 h-10 px-4 sm:px-5 rounded-xl bg-primary hover:bg-primary-hover text-on-primary text-xs sm:text-sm font-bold transition-all shadow-sm shadow-primary/20 cursor-pointer"
+            className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 h-10 px-3.5 sm:px-5 rounded-xl bg-primary hover:bg-primary-hover text-on-primary text-xs sm:text-sm font-bold transition-all shadow-sm shadow-primary/20 cursor-pointer whitespace-nowrap"
           >
-            <span className="material-symbols-outlined text-[18px]">receipt_long</span>
+            <span className="material-symbols-outlined text-[18px] shrink-0">receipt_long</span>
             <span>Émettre une facture</span>
           </Link>
         </div>
@@ -189,8 +189,8 @@ export default function Dashboard() {
       {/* ── 3. CHARTS SECTION ── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Bar Chart */}
-        <div className="lg:col-span-8 bg-surface rounded-2xl p-6 sm:p-7 border border-border-base shadow-sm flex flex-col justify-between gap-6">
-          <div className="flex items-center justify-between gap-2">
+        <div className="lg:col-span-8 bg-surface rounded-2xl p-4 sm:p-7 border border-border-base shadow-sm flex flex-col justify-between gap-6">
+          <div className="flex flex-wrap items-start sm:items-center justify-between gap-2">
             <div>
               <h2 className="text-lg sm:text-xl font-extrabold text-text-primary tracking-tight">
                 {t('dashboard.revenue_6_months')}
@@ -199,7 +199,7 @@ export default function Dashboard() {
                 Évolution semestrielle des encaissements certifiés
               </p>
             </div>
-            <span className="text-xs font-semibold px-3 py-1 rounded-full bg-surface-container border border-border-base text-text-secondary">
+            <span className="text-xs font-semibold px-3 py-1 rounded-full bg-surface-container border border-border-base text-text-secondary shrink-0 whitespace-nowrap">
               6 derniers mois
             </span>
           </div>
@@ -214,7 +214,7 @@ export default function Dashboard() {
             </div>
 
             {/* Bars */}
-            <div className="relative w-full h-full flex items-end justify-around z-10 pb-6">
+            <div className="relative w-full h-full flex items-end justify-around z-10 pb-6 gap-1 sm:gap-2">
               {[
                 { label: t('month.mar'), height: '45%', value: '12k' },
                 { label: t('month.apr'), height: '60%', value: '15k' },
@@ -234,7 +234,7 @@ export default function Dashboard() {
                 >
                   <div
                     style={{ height: bar.height }}
-                    className={`w-8 sm:w-12 rounded-t-lg transition-colors duration-200 relative ${
+                    className={`w-7 sm:w-12 rounded-t-lg transition-colors duration-200 relative ${
                       bar.current
                         ? 'bg-primary shadow-sm'
                         : 'bg-surface-container-high hover:bg-primary/60'
@@ -258,7 +258,7 @@ export default function Dashboard() {
         </div>
 
         {/* Donut Chart */}
-        <div className="lg:col-span-4 bg-surface rounded-2xl p-6 sm:p-7 border border-border-base shadow-sm flex flex-col justify-between gap-6">
+        <div className="lg:col-span-4 bg-surface rounded-2xl p-4 sm:p-7 border border-border-base shadow-sm flex flex-col justify-between gap-6">
           <div>
             <h2 className="text-lg sm:text-xl font-extrabold text-text-primary tracking-tight">
               {t('dashboard.payment_breakdown')}
@@ -349,9 +349,9 @@ export default function Dashboard() {
       {/* ── 4. ACTIVITÉ RÉCENTE (SECTION FLUIDE, ALIGNÉE & MÉDAILLONS PRO) ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Commandes récentes */}
-        <div className="bg-surface rounded-2xl p-6 sm:p-7 border border-border-base shadow-sm flex flex-col gap-4">
-          <div className="flex items-center justify-between gap-2 pb-3 border-b border-border-base">
-            <div>
+        <div className="bg-surface rounded-2xl p-4 sm:p-7 border border-border-base shadow-sm flex flex-col gap-4">
+          <div className="flex items-start sm:items-center justify-between gap-3 pb-3 border-b border-border-base">
+            <div className="min-w-0">
               <h2 className="text-lg sm:text-xl font-extrabold text-text-primary tracking-tight">
                 {t('dashboard.recent_orders')}
               </h2>
@@ -361,7 +361,7 @@ export default function Dashboard() {
             </div>
             <Link
               href="/dashboard/commandes"
-              className="text-xs sm:text-sm font-bold text-primary hover:text-primary-hover transition-colors flex items-center gap-1 shrink-0"
+              className="text-xs sm:text-sm font-bold text-primary hover:text-primary-hover transition-colors flex items-center gap-1 shrink-0 whitespace-nowrap"
             >
               <span>{t('dashboard.view_all')}</span>
               <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
@@ -390,59 +390,59 @@ export default function Dashboard() {
                 <Link
                   key={cmd.id}
                   href={`/dashboard/commandes/${cmd.id}`}
-                  className="flex items-center justify-between py-3 px-2 sm:px-3 hover:bg-surface-container/60 rounded-xl transition-colors group cursor-pointer gap-3 sm:gap-4"
+                  className="flex items-center justify-between py-3.5 px-2 sm:px-3 hover:bg-surface-container/60 rounded-xl transition-colors group cursor-pointer gap-3"
                 >
                   {/* Médaillon circulaire + détails */}
-                  <div className="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
-                    <div className="w-10 h-10 rounded-full bg-surface-container-high border border-border-base/60 flex items-center justify-center text-text-secondary group-hover:bg-primary/15 group-hover:text-primary transition-colors shrink-0">
-                      <span className="material-symbols-outlined text-[20px]">shopping_bag</span>
+                  <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface-container-high border border-border-base/60 flex items-center justify-center text-text-secondary group-hover:bg-primary/15 group-hover:text-primary transition-colors shrink-0">
+                      <span className="material-symbols-outlined text-[18px] sm:text-[20px]">shopping_bag</span>
                     </div>
-                    <div className="flex flex-col min-w-0">
-                      <div className="flex items-center gap-2 truncate">
-                        <span className="text-sm font-bold text-text-primary group-hover:text-primary transition-colors shrink-0">
+                    <div className="flex flex-col min-w-0 flex-1 overflow-hidden">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2 min-w-0">
+                        <span className="text-xs sm:text-sm font-bold text-text-primary group-hover:text-primary transition-colors whitespace-nowrap truncate">
                           {cmd.numero}
                         </span>
                         {cmd.clientNom && (
-                          <span className="text-xs sm:text-sm text-text-secondary truncate">
+                          <span className="text-xs text-text-secondary truncate">
                             {cmd.clientNom}
                           </span>
                         )}
                       </div>
-                      <span className="text-xs text-text-secondary mt-0.5">
+                      <span className="text-[11px] sm:text-xs text-text-secondary mt-0.5 whitespace-nowrap truncate">
                         {cmd.dateCreation}
                       </span>
                     </div>
                   </div>
 
-                  {/* Montant + Statut */}
-                  <div className="flex items-center gap-3 sm:gap-4 shrink-0">
-                    <span className="text-sm sm:text-base font-bold text-text-primary whitespace-nowrap text-right tabular-nums min-w-[75px] sm:min-w-[95px]">
+                  {/* Montant + Statut (empilés à droite sur mobile/tablette, côte à côte sur grand écran) */}
+                  <div className="flex flex-col xl:flex-row items-end xl:items-center gap-1.5 xl:gap-4 shrink-0">
+                    <span className="text-xs sm:text-base font-bold text-text-primary whitespace-nowrap text-right tabular-nums xl:min-w-[95px]">
                       {formatCurrency(cmd.totalTTC || 0)}
                     </span>
 
-                    <div className="w-24 sm:w-28 flex justify-end shrink-0">
+                    <div className="xl:w-28 flex justify-end shrink-0">
                       {cmd.statut === 'livree' && (
-                        <span className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 text-xs font-semibold px-2.5 sm:px-3 py-1 rounded-full text-center whitespace-nowrap">
+                        <span className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-center whitespace-nowrap">
                           {t('status.delivered')}
                         </span>
                       )}
                       {cmd.statut === 'confirmee' && (
-                        <span className="bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/25 text-xs font-semibold px-2.5 sm:px-3 py-1 rounded-full text-center whitespace-nowrap">
+                        <span className="bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/25 text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-center whitespace-nowrap">
                           {t('status.confirmed')}
                         </span>
                       )}
                       {cmd.statut === 'preparation' && (
-                        <span className="bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/25 text-xs font-semibold px-2.5 sm:px-3 py-1 rounded-full text-center whitespace-nowrap">
+                        <span className="bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/25 text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-center whitespace-nowrap">
                           {t('status.preparing')}
                         </span>
                       )}
                       {cmd.statut === 'attente' && (
-                        <span className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25 text-xs font-semibold px-2.5 sm:px-3 py-1 rounded-full text-center whitespace-nowrap">
+                        <span className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25 text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-center whitespace-nowrap">
                           {t('status.pending')}
                         </span>
                       )}
                       {cmd.statut === 'annulee' && (
-                        <span className="bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/25 text-xs font-semibold px-2.5 sm:px-3 py-1 rounded-full text-center whitespace-nowrap">
+                        <span className="bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/25 text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-center whitespace-nowrap">
                           {t('status.cancelled')}
                         </span>
                       )}
@@ -455,9 +455,9 @@ export default function Dashboard() {
         </div>
 
         {/* Factures récentes */}
-        <div className="bg-surface rounded-2xl p-6 sm:p-7 border border-border-base shadow-sm flex flex-col gap-4">
-          <div className="flex items-center justify-between gap-2 pb-3 border-b border-border-base">
-            <div>
+        <div className="bg-surface rounded-2xl p-4 sm:p-7 border border-border-base shadow-sm flex flex-col gap-4">
+          <div className="flex items-start sm:items-center justify-between gap-3 pb-3 border-b border-border-base">
+            <div className="min-w-0">
               <h2 className="text-lg sm:text-xl font-extrabold text-text-primary tracking-tight">
                 {t('dashboard.recent_invoices')}
               </h2>
@@ -467,7 +467,7 @@ export default function Dashboard() {
             </div>
             <Link
               href="/dashboard/factures"
-              className="text-xs sm:text-sm font-bold text-primary hover:text-primary-hover transition-colors flex items-center gap-1 shrink-0"
+              className="text-xs sm:text-sm font-bold text-primary hover:text-primary-hover transition-colors flex items-center gap-1 shrink-0 whitespace-nowrap"
             >
               <span>{t('dashboard.view_all')}</span>
               <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
@@ -496,54 +496,54 @@ export default function Dashboard() {
                 <Link
                   key={fac.id}
                   href={`/dashboard/factures/${fac.id}`}
-                  className="flex items-center justify-between py-3 px-2 sm:px-3 hover:bg-surface-container/60 rounded-xl transition-colors group cursor-pointer gap-3 sm:gap-4"
+                  className="flex items-center justify-between py-3.5 px-2 sm:px-3 hover:bg-surface-container/60 rounded-xl transition-colors group cursor-pointer gap-3"
                 >
                   {/* Médaillon circulaire + détails */}
-                  <div className="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
-                    <div className="w-10 h-10 rounded-full bg-surface-container-high border border-border-base/60 flex items-center justify-center text-text-secondary group-hover:bg-primary/15 group-hover:text-primary transition-colors shrink-0">
-                      <span className="material-symbols-outlined text-[20px]">receipt_long</span>
+                  <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface-container-high border border-border-base/60 flex items-center justify-center text-text-secondary group-hover:bg-primary/15 group-hover:text-primary transition-colors shrink-0">
+                      <span className="material-symbols-outlined text-[18px] sm:text-[20px]">receipt_long</span>
                     </div>
-                    <div className="flex flex-col min-w-0">
-                      <div className="flex items-center gap-2 truncate">
-                        <span className="text-sm font-bold text-text-primary group-hover:text-primary transition-colors shrink-0">
+                    <div className="flex flex-col min-w-0 flex-1 overflow-hidden">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2 min-w-0">
+                        <span className="text-xs sm:text-sm font-bold text-text-primary group-hover:text-primary transition-colors whitespace-nowrap truncate">
                           {fac.numero}
                         </span>
                         {fac.clientNom && (
-                          <span className="text-xs sm:text-sm text-text-secondary truncate">
+                          <span className="text-xs text-text-secondary truncate">
                             {fac.clientNom}
                           </span>
                         )}
                       </div>
-                      <span className="text-xs text-text-secondary mt-0.5">
+                      <span className="text-[11px] sm:text-xs text-text-secondary mt-0.5 whitespace-nowrap truncate">
                         Échéance : {fac.dateEcheance || fac.dateEmission}
                       </span>
                     </div>
                   </div>
 
-                  {/* Montant + Statut */}
-                  <div className="flex items-center gap-3 sm:gap-4 shrink-0">
-                    <span className="text-sm sm:text-base font-bold text-text-primary whitespace-nowrap text-right tabular-nums min-w-[75px] sm:min-w-[95px]">
+                  {/* Montant + Statut (empilés à droite sur mobile/tablette, côte à côte sur grand écran) */}
+                  <div className="flex flex-col xl:flex-row items-end xl:items-center gap-1.5 xl:gap-4 shrink-0">
+                    <span className="text-xs sm:text-base font-bold text-text-primary whitespace-nowrap text-right tabular-nums xl:min-w-[95px]">
                       {formatCurrency(fac.totalTTC || 0)}
                     </span>
 
-                    <div className="w-24 sm:w-28 flex justify-end shrink-0">
+                    <div className="xl:w-28 flex justify-end shrink-0">
                       {fac.statut === 'payee' && (
-                        <span className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 text-xs font-semibold px-2.5 sm:px-3 py-1 rounded-full text-center whitespace-nowrap">
+                        <span className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-center whitespace-nowrap">
                           {t('status.paid')}
                         </span>
                       )}
                       {fac.statut === 'attente' && (
-                        <span className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25 text-xs font-semibold px-2.5 sm:px-3 py-1 rounded-full text-center whitespace-nowrap">
+                        <span className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25 text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-center whitespace-nowrap">
                           {t('status.pending')}
                         </span>
                       )}
                       {fac.statut === 'retard' && (
-                        <span className="bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/25 text-xs font-semibold px-2.5 sm:px-3 py-1 rounded-full text-center whitespace-nowrap">
+                        <span className="bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/25 text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-center whitespace-nowrap">
                           {t('status.overdue')}
                         </span>
                       )}
                       {fac.statut === 'annulee' && (
-                        <span className="bg-surface-container-highest text-text-secondary border border-border-base text-xs font-semibold px-2.5 sm:px-3 py-1 rounded-full text-center whitespace-nowrap">
+                        <span className="bg-surface-container-highest text-text-secondary border border-border-base text-[11px] sm:text-xs font-semibold px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-center whitespace-nowrap">
                           {t('status.cancelled')}
                         </span>
                       )}
