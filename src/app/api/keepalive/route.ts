@@ -1,20 +1,33 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
 /**
  * Keep-alive endpoint called daily by a Vercel Cron job (see vercel.json).
- * It sends a tiny read request to Supabase so the free-tier project is never
- * paused for inactivity (Supabase pauses projects after ~7 days without activity).
+ * Protected by optional CRON_SECRET and strips internal error details.
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const cronSecret = process.env.CRON_SECRET;
+  if (cronSecret) {
+    const authHeader = request.headers.get('authorization');
+    if (authHeader !== `Bearer ${cronSecret}`) {
+      return NextResponse.json(
+        { ok: false, error: 'Unauthorized' },
+        { status: 401, headers: { 'Cache-Control': 'no-store' } }
+      );
+    }
+  }
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey =
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
-    return NextResponse.json({ ok: false, error: 'Missing Supabase env vars' }, { status: 500 });
+    return NextResponse.json(
+      { ok: false, status: 503 },
+      { status: 503, headers: { 'Cache-Control': 'no-store' } }
+    );
   }
 
   try {
@@ -28,15 +41,17 @@ export async function GET() {
       signal: AbortSignal.timeout(8000),
     });
 
-    return NextResponse.json({
-      ok: res.ok,
-      status: res.status,
-      pingedAt: new Date().toISOString(),
-    });
-  } catch (e: any) {
     return NextResponse.json(
-      { ok: false, error: e?.message || 'Ping failed', pingedAt: new Date().toISOString() },
-      { status: 502 }
+      {
+        ok: res.ok,
+        pingedAt: new Date().toISOString(),
+      },
+      { headers: { 'Cache-Control': 'no-store' } }
+    );
+  } catch {
+    return NextResponse.json(
+      { ok: false, pingedAt: new Date().toISOString() },
+      { status: 502, headers: { 'Cache-Control': 'no-store' } }
     );
   }
 }

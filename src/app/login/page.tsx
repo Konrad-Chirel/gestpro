@@ -97,7 +97,17 @@ function LoginPageContent() {
       }
 
       showToast(lang === 'en' ? 'Welcome back!' : 'Connexion réussie !', 'success');
-      router.push('/dashboard');
+      const rawRedirect = searchParams.get('redirect') || '/dashboard';
+      const safeRedirect =
+        rawRedirect.startsWith('/') &&
+        !rawRedirect.startsWith('//') &&
+        !rawRedirect.startsWith('/\\') &&
+        !rawRedirect.includes('@') &&
+        !rawRedirect.includes('\\') &&
+        !rawRedirect.includes(':')
+          ? rawRedirect
+          : '/dashboard';
+      router.push(safeRedirect);
     } catch (err: any) {
       showToast(err.message || 'Erreur lors de la connexion', 'error');
       setIsLoading(false);

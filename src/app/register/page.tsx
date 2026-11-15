@@ -43,6 +43,16 @@ export default function RegisterPage() {
       return;
     }
 
+    if (password.length < 8 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
+      showToast(
+        lang === 'en'
+          ? 'Password must be at least 8 characters and include a letter and a number.'
+          : 'Le mot de passe doit contenir au moins 8 caractères, une lettre et un chiffre.',
+        'error'
+      );
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const trimmedNom = nom.trim();

@@ -18,12 +18,15 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Les utilisateurs peuvent voir leur profil" ON public.profiles;
 CREATE POLICY "Les utilisateurs peuvent voir leur profil" 
 ON public.profiles FOR SELECT USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Les utilisateurs peuvent modifier leur profil" ON public.profiles;
 CREATE POLICY "Les utilisateurs peuvent modifier leur profil" 
-ON public.profiles FOR UPDATE USING (auth.uid() = id);
+ON public.profiles FOR UPDATE USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Les utilisateurs peuvent insérer leur profil" ON public.profiles;
 CREATE POLICY "Les utilisateurs peuvent insérer leur profil" 
 ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
 
@@ -45,8 +48,9 @@ CREATE TABLE IF NOT EXISTS public.company_settings (
 
 ALTER TABLE public.company_settings ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Accès aux paramètres de l'entreprise" ON public.company_settings;
 CREATE POLICY "Accès aux paramètres de l'entreprise" 
-ON public.company_settings FOR ALL USING (auth.uid() = user_id);
+ON public.company_settings FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- 4. TABLE CLIENTS
 CREATE TABLE IF NOT EXISTS public.clients (
@@ -67,13 +71,15 @@ CREATE TABLE IF NOT EXISTS public.clients (
   total_depense NUMERIC(15, 2) DEFAULT 0,
   solde_du NUMERIC(15, 2) DEFAULT 0,
   delai_paiement TEXT DEFAULT '14 Jours',
-  created_at TIMESTAMPTZ DEFAULT now()
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE (user_id, id)
 );
 
 ALTER TABLE public.clients ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Accès aux clients de l'utilisateur" ON public.clients;
 CREATE POLICY "Accès aux clients de l'utilisateur" 
-ON public.clients FOR ALL USING (auth.uid() = user_id);
+ON public.clients FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- 5. TABLE COMMANDES
 CREATE TABLE IF NOT EXISTS public.commandes (
@@ -92,13 +98,15 @@ CREATE TABLE IF NOT EXISTS public.commandes (
   tva NUMERIC(15, 2) DEFAULT 0,
   total_ttc NUMERIC(15, 2) DEFAULT 0,
   notes TEXT,
-  created_at TIMESTAMPTZ DEFAULT now()
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE (user_id, id)
 );
 
 ALTER TABLE public.commandes ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Accès aux commandes de l'utilisateur" ON public.commandes;
 CREATE POLICY "Accès aux commandes de l'utilisateur" 
-ON public.commandes FOR ALL USING (auth.uid() = user_id);
+ON public.commandes FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- 6. TABLE FACTURES
 CREATE TABLE IF NOT EXISTS public.factures (
@@ -120,13 +128,15 @@ CREATE TABLE IF NOT EXISTS public.factures (
   montant_paye NUMERIC(15, 2) DEFAULT 0,
   date_emission TEXT NOT NULL,
   date_echeance TEXT NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT now()
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE (user_id, id)
 );
 
 ALTER TABLE public.factures ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Accès aux factures de l'utilisateur" ON public.factures;
 CREATE POLICY "Accès aux factures de l'utilisateur" 
-ON public.factures FOR ALL USING (auth.uid() = user_id);
+ON public.factures FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- 7. TABLE PAIEMENTS
 CREATE TABLE IF NOT EXISTS public.paiements (
@@ -148,8 +158,9 @@ CREATE TABLE IF NOT EXISTS public.paiements (
 
 ALTER TABLE public.paiements ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Accès aux paiements de l'utilisateur" ON public.paiements;
 CREATE POLICY "Accès aux paiements de l'utilisateur" 
-ON public.paiements FOR ALL USING (auth.uid() = user_id);
+ON public.paiements FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- 8. TABLE PRODUITS
 CREATE TABLE IF NOT EXISTS public.produits (
@@ -168,13 +179,18 @@ CREATE TABLE IF NOT EXISTS public.produits (
 
 ALTER TABLE public.produits ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Accès aux produits de l'utilisateur" ON public.produits;
 CREATE POLICY "Accès aux produits de l'utilisateur" 
-ON public.produits FOR ALL USING (auth.uid() = user_id);
+ON public.produits FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 -- 9. TRIGGER AUTOMATIQUE À L'INSCRIPTION D'UN NOUVEL UTILISATEUR
--- Crée automatiquement le profil et les paramètres d'entreprise
+-- Crée automatiquement le profil et les paramètres d'entreprise avec search_path verrouillé
 CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS trigger AS $$
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
 BEGIN
   INSERT INTO public.profiles (id, email, full_name, company_name)
   VALUES (
@@ -193,7 +209,7 @@ BEGIN
 
   RETURN new;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 

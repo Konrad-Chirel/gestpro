@@ -1,20 +1,30 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
+const PUBLIC_PATHS = ['/', '/login', '/register', '/signup', '/auth/callback', '/api/keepalive'];
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   });
+
+  const pathname = request.nextUrl.pathname;
+  const isPublicPath = PUBLIC_PATHS.some(
+    (p) => pathname === p || (p !== '/' && pathname.startsWith(p + '/'))
+  );
+  const isApiRoute = pathname.startsWith('/api/');
+  const isProtectedRoute = !isPublicPath;
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey =
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
-  const isDashboardRoute = request.nextUrl.pathname.startsWith('/dashboard');
-
   if (!supabaseUrl || !supabaseAnonKey) {
-    if (isDashboardRoute) {
+    if (isProtectedRoute) {
+      if (isApiRoute) {
+        return NextResponse.json({ error: 'Service non configuré' }, { status: 503 });
+      }
       return NextResponse.redirect(new URL('/login', request.url));
     }
     return supabaseResponse;
@@ -24,11 +34,13 @@ export async function updateSession(request: NextRequest) {
   const allCookies = request.cookies.getAll();
   const hasAuthCookie = allCookies.some((c) => c.name.startsWith('sb-'));
 
-  // If accessing /dashboard without auth cookies, redirect to /login
   if (!hasAuthCookie) {
-    if (isDashboardRoute) {
+    if (isProtectedRoute) {
+      if (isApiRoute) {
+        return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+      }
       const loginUrl = new URL('/login', request.url);
-      loginUrl.searchParams.set('redirect', request.nextUrl.pathname);
+      loginUrl.searchParams.set('redirect', pathname);
       return NextResponse.redirect(loginUrl);
     }
     return supabaseResponse;
@@ -67,10 +79,12 @@ export async function updateSession(request: NextRequest) {
     // If Supabase is slow or paused, proceed gracefully without crashing the site
   }
 
-  // If accessing /dashboard without a valid authenticated user, redirect to /login
-  if (!user && isDashboardRoute) {
+  if (!user && isProtectedRoute) {
+    if (isApiRoute) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+    }
     const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('redirect', request.nextUrl.pathname);
+    loginUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(loginUrl);
   }
 

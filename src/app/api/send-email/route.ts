@@ -1,7 +1,36 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { resend } from '@/lib/resend';
+import { createClient } from '@/lib/supabase/server';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+
+function escapeHtml(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX_REQUESTS = 10;
+
+function checkRateLimit(key: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(key);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= RATE_LIMIT_MAX_REQUESTS) {
+    return false;
+  }
+  entry.count += 1;
+  return true;
+}
 
 function generateInvoicePdf(facture: any, companySettings: any, currencySymbol: string): Buffer {
   const doc = new jsPDF({
@@ -244,18 +273,47 @@ function generateInvoicePdf(facture: any, companySettings: any, currencySymbol: 
 
 export async function POST(request: NextRequest) {
   try {
+    // 1. Enforce server-side Supabase authentication
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Authentification requise pour envoyer des factures par email.' },
+        { status: 401 }
+      );
+    }
+
+    // 2. Per-user rate limiting (max 10 emails / minute)
+    if (!checkRateLimit(user.id)) {
+      return NextResponse.json(
+        { error: "Trop d'envois d'emails. Veuillez patienter une minute." },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const { to, subject, facture, companySettings } = body;
 
-    if (!to || typeof to !== 'string') {
-      return NextResponse.json({ error: 'Adresse email destinataire manquante' }, { status: 400 });
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!to || typeof to !== 'string' || !emailRegex.test(to.trim()) || to.length > 254) {
+      return NextResponse.json({ error: 'Adresse email destinataire invalide ou manquante' }, { status: 400 });
     }
 
-    const companyName = companySettings?.companyName || 'GestPro S.A.S';
-    const companyAddress = companySettings?.address || '15 Avenue des Champs-Élysées';
-    const companyZip = companySettings?.zip || '75008';
-    const companyCity = companySettings?.city || 'Paris';
-    const companyTva = companySettings?.tva || 'FR 12 345678901';
+    const rawCompanyName = String(companySettings?.companyName || 'GestPro S.A.S').slice(0, 120);
+    const rawCompanyAddress = String(companySettings?.address || '15 Avenue des Champs-Élysées').slice(0, 200);
+    const rawCompanyZip = String(companySettings?.zip || '75008').slice(0, 20);
+    const rawCompanyCity = String(companySettings?.city || 'Paris').slice(0, 80);
+    const rawCompanyTva = String(companySettings?.tva || 'FR 12 345678901').slice(0, 50);
+
+    const companyName = escapeHtml(rawCompanyName);
+    const companyAddress = escapeHtml(rawCompanyAddress);
+    const companyZip = escapeHtml(rawCompanyZip);
+    const companyCity = escapeHtml(rawCompanyCity);
+    const companyTva = escapeHtml(rawCompanyTva);
     const currency = companySettings?.currency || 'EUR';
     const currencySymbol = currency === 'XOF' ? 'FCFA' : currency === 'USD' ? '$' : '€';
 
@@ -268,18 +326,28 @@ export async function POST(request: NextRequest) {
       );
     };
 
-    const factureNumber = facture?.numero || 'FAC-2026-0038';
-    const clientNom = facture?.clientNom || 'Amadou Trading';
-    const clientAddress = facture?.clientAdresse || 'Zone Industrielle Sud, Lot 42, BP 1234 Dakar, Sénégal';
-    const clientNinea = facture?.clientSiret || '001234567 2B2';
-    const dateEmission = facture?.dateEmission || '24/10/2026';
-    const dateEcheance = facture?.dateEcheance || '24/11/2026';
+    const rawFactureNumber = String(facture?.numero || 'FAC-2026-0038').slice(0, 60);
+    const rawClientNom = String(facture?.clientNom || 'Amadou Trading').slice(0, 120);
+    const rawClientAddress = String(
+      facture?.clientAdresse || 'Zone Industrielle Sud, Lot 42, BP 1234 Dakar, Sénégal'
+    ).slice(0, 240);
+    const rawClientNinea = String(facture?.clientSiret || '001234567 2B2').slice(0, 60);
+    const rawDateEmission = String(facture?.dateEmission || '24/10/2026').slice(0, 30);
+    const rawDateEcheance = String(facture?.dateEcheance || '24/11/2026').slice(0, 30);
+
+    const factureNumber = escapeHtml(rawFactureNumber);
+    const safePdfFilename = rawFactureNumber.replace(/[^a-zA-Z0-9_-]/g, '_') || 'Facture';
+    const clientNom = escapeHtml(rawClientNom);
+    const clientAddress = escapeHtml(rawClientAddress);
+    const clientNinea = escapeHtml(rawClientNinea);
+    const dateEmission = escapeHtml(rawDateEmission);
+    const dateEcheance = escapeHtml(rawDateEcheance);
     const statut = facture?.statut || 'attente';
 
     // Articles resolution
     const articles =
-      facture?.articles && facture.articles.length > 0
-        ? facture.articles
+      Array.isArray(facture?.articles) && facture.articles.length > 0
+        ? facture.articles.slice(0, 100)
         : [
             { description: 'Farine de Blé', quantity: 10, unitPrice: 35.0, total: 350.0 },
             { description: "Huile d'Arachide", quantity: 15, unitPrice: 42.0, total: 630.0 },
@@ -297,15 +365,15 @@ export async function POST(request: NextRequest) {
     const formattedMontantPaye = formatPrice(montantPaye);
     const formattedResteDu = formatPrice(resteDu);
 
-    // Generate high-resolution official A4 PDF Buffer
+    // Generate high-resolution official A4 PDF Buffer using raw (un-escaped) strings
     const pdfBuffer = generateInvoicePdf(
       {
-        numero: factureNumber,
-        clientNom,
-        clientAdresse: clientAddress,
-        clientSiret: clientNinea,
-        dateEmission,
-        dateEcheance,
+        numero: rawFactureNumber,
+        clientNom: rawClientNom,
+        clientAdresse: rawClientAddress,
+        clientSiret: rawClientNinea,
+        dateEmission: rawDateEmission,
+        dateEcheance: rawDateEcheance,
         statut,
         articles,
         totalHT,
@@ -314,7 +382,13 @@ export async function POST(request: NextRequest) {
         montantPaye,
         resteDu,
       },
-      companySettings,
+      {
+        companyName: rawCompanyName,
+        address: rawCompanyAddress,
+        zip: rawCompanyZip,
+        city: rawCompanyCity,
+        tva: rawCompanyTva,
+      },
       currencySymbol
     );
 
@@ -335,10 +409,10 @@ export async function POST(request: NextRequest) {
         </span>`;
     }
 
-    // Articles rows HTML with protection against Gmail blue link styling
+    // Articles rows HTML with HTML escaping and protection against Gmail blue link styling
     const articlesRowsHtml = articles
       .map((art: any) => {
-        const desc = art.description || art.designation || art.nom || 'Article';
+        const desc = escapeHtml(String(art.description || art.designation || art.nom || 'Article').slice(0, 200));
         const qte = Number(art.quantity || art.quantite || 1);
         const pu = Number(art.unitPrice || art.prixUnitaire || art.prix || 0);
         const lineTotal = Number(art.total || qte * pu);
@@ -371,7 +445,11 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const emailSubject = subject || `Facture ${factureNumber} - ${companyName}`;
+    const rawSubject =
+      typeof subject === 'string' && subject.trim()
+        ? subject.replace(/[\r\n]/g, ' ').slice(0, 160)
+        : `Facture ${rawFactureNumber} - ${rawCompanyName}`;
+    const emailSubject = escapeHtml(rawSubject);
 
     // Responsive, high-fidelity email HTML
     const htmlContent = `
@@ -587,16 +665,16 @@ export async function POST(request: NextRequest) {
 
     const fromAddress =
       process.env.RESEND_FROM_EMAIL ||
-      `${companyName.replace(/[^a-zA-Z0-9 ]/g, '')} <onboarding@resend.dev>`;
+      `${rawCompanyName.replace(/[^a-zA-Z0-9 ]/g, '') || 'GestPro'} <onboarding@resend.dev>`;
 
     const { data, error } = await resend.emails.send({
       from: fromAddress,
-      to: [to],
-      subject: emailSubject,
+      to: [to.trim()],
+      subject: rawSubject,
       html: htmlContent,
       attachments: [
         {
-          filename: `${factureNumber}.pdf`,
+          filename: `${safePdfFilename}.pdf`,
           content: pdfBuffer,
         },
       ],
@@ -604,7 +682,7 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Erreur Resend:', error);
-      let userFriendlyMsg = error.message;
+      let userFriendlyMsg = "Échec de l'envoi de l'email.";
       if (error.message?.includes('only send testing emails to your own email address')) {
         userFriendlyMsg =
           "En mode test gratuit Resend, vous pouvez envoyer des tests uniquement vers l'adresse email de votre compte Resend. Pour envoyer à tous vos clients, validez votre domaine sur resend.com/domains.";
@@ -616,7 +694,7 @@ export async function POST(request: NextRequest) {
   } catch (err: any) {
     console.error('Erreur API send-email:', err);
     return NextResponse.json(
-      { error: err.message || 'Une erreur est survenue lors de l’envoi' },
+      { error: 'Une erreur interne est survenue lors du traitement de la requête.' },
       { status: 500 }
     );
   }
